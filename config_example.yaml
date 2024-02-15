@@ -1,0 +1,68 @@
+system:
+  env: debug # debug | release | test
+  addr: 0000
+  db-type: mysql
+  use-redis: true
+  use-init: true
+  use-task: true
+  iplimit-count: 15000
+  iplimit-time: 3600
+  router-prefix: "api"
+
+blockchain:
+  open-sweep-block: true
+  sweep-mainnet: true
+  ethereum: true
+  bitcoin: true
+  tron: true
+  bsc: true
+  litecoin: true
+  op: false
+  arbitrum-one: false
+  arbitrum-nova: false
+
+blockchain-plugin:
+  bitcoin: "tatum" # tatum | mempool
+  litecoin: "tatum" # tatum | mempool
+
+telegram:
+  allinone-inform-bot-link: 
+  allinone-inform-bot-token: 
+  allinone-inform-channel-id: 
+  allinone-notification-bot-link: 
+  allinone-notification-bot-token: 
+  allinone-notification-bot-id: 
+
+allinone:
+  verify-inform-key-header: "x-server-token"
+  verify-inform-key-token: 
+
+wss:
+  sec-wss-token: 
+
+zap:
+  level: info
+  format: console
+  prefix: "[market/server]"
+  director: log
+  show-line: true
+  encode-level: LowercaseColorLevelEncoder
+  stacktrace-key: stacktrace
+  log-in-console: true
+
+redis:
+  db: 
+  addr: 
+  password: ""
+
+mysql:
+  path: 
+  port: 
+  config: charset=utf8mb4&parseTime=True
+  db-name: 
+  username: 
+  password: 
+  max-idle-conns: 10
+  max-open-conns: 100
+  log-mode: error
+  log-zap: false
