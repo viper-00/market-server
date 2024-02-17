@@ -6,9 +6,13 @@ import (
 )
 
 var (
-	AlchemyMainnetKey = []string{}
+	AlchemyMainnetKey = []string{
+		"",
+	}
 
-	AlchemyTestnetKey = []string{}
+	AlchemyTestnetKey = []string{
+		"",
+	}
 
 	ETHMainnetRPC = []string{
 		"https://eth-mainnet.g.alchemy.com/v2/" + getRandomAlchemyKey(true),

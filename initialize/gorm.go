@@ -21,12 +21,7 @@ func Gorm() *gorm.DB {
 func RegisterTables() {
 	db := global.MARKET_DB
 	if err := db.AutoMigrate(
-		model.Wallet{},
-		model.Chain{},
-		model.Transaction{},
-		model.OwnTransaction{},
-		model.TelegramUser{},
-		model.TelegramAllInOneKey{},
+		model.User{},
 	); err != nil {
 		global.MARKET_LOG.Error("db: register table failed", zap.Error(err))
 		os.Exit(0)

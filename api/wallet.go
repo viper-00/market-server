@@ -13,7 +13,8 @@ import (
 )
 
 func (n *MarketApi) Test(c *gin.Context) {
-	c.JSON(http.StatusOK, nil)
+	res := common.OkWithMessage("execution succeed")
+	c.JSON(http.StatusOK, res)
 }
 
 func (n *MarketApi) GetNetworkInfo(c *gin.Context) {

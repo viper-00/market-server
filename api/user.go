@@ -31,7 +31,8 @@ func (n *MarketApi) Register(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	res = common.OkWithMessage("execution succeed")
+	c.JSON(http.StatusOK, res)
 }
 
 func (n *MarketApi) VerifyInvitation(c *gin.Context) {
@@ -54,7 +55,8 @@ func (n *MarketApi) VerifyInvitation(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	res = common.OkWithMessage("execution succeed")
+	c.JSON(http.StatusOK, res)
 }
 
 func (n *MarketApi) Login(c *gin.Context) {
@@ -69,7 +71,7 @@ func (n *MarketApi) Login(c *gin.Context) {
 		return
 	}
 
-	err = service.MarketService.UserLogin(user)
+	result, err := service.MarketService.UserLogin(user)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error(), zap.Error(err))
 		res = common.FailWithMessage(err.Error())
@@ -77,5 +79,6 @@ func (n *MarketApi) Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	res = common.OKWithData(result)
+	c.JSON(http.StatusOK, res)
 }

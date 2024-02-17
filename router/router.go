@@ -37,7 +37,7 @@ func (mRouter *MainRouter) InitRouter(Router *gin.RouterGroup) {
 
 		// login and register
 		clientRouter.POST("register", api.Register)
-		clientRouter.POST("verify-invitation", api.VerifyInvitation)
+		clientRouter.GET("verify-invitation", api.VerifyInvitation)
 		clientRouter.POST("login", api.Login)
 	}
 

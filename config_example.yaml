@@ -66,3 +66,12 @@ mysql:
   max-open-conns: 100
   log-mode: error
   log-zap: false
+
+smtp:
+  host:
+  port:
+  username:
+  password:
+
+client:
+  url: 

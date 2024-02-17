@@ -15,6 +15,19 @@ type Server struct {
 	BlockchainPlugin BlockchainPlugin `mapstructure:"blockchain-plugin" json:"blockchain-plugin" yaml:"blockchain-plugin"`
 	Telegram         Telegram         `mapstructure:"telegram" json:"telegram" yaml:"telegram"`
 	Wss              Wss              `mapstructure:"wss" json:"wss" yaml:"wss"`
+	Smtp             Smtp             `mapstructure:"smtp" json:"smtp" yaml:"smtp"`
+	Client           Client           `mapstructure:"client" json:"client" yaml:"client"`
+}
+
+type Client struct {
+	Url string `mapstructure:"url" json:"url" yaml:"url"`
+}
+
+type Smtp struct {
+	Host     string `mapstructure:"host" json:"host" yaml:"host"`
+	Port     int    `mapstructure:"port" json:"port" yaml:"port"`
+	Username string `mapstructure:"username" json:"username" yaml:"username"`
+	Password string `mapstructure:"password" json:"password" yaml:"password"`
 }
 
 type Telegram struct {
