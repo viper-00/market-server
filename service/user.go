@@ -33,36 +33,41 @@ func (m *MService) IsUserExist(email string) (error, bool) {
 	return err, false
 }
 
-const (
-	ConstantAccountString = "account-%s"
-)
-
-func (m *MService) UserRegister(info request.UserRegister) (err error) {
+func (m *MService) UserRegister(info request.UserRegister) error {
 	if info.Email != "" {
 
 		errExist, isExist := m.IsUserExist(info.Email)
 		if isExist {
-			return errors.New("User already exists")
+			return errors.New("user already exists")
 		} else if errExist == nil && !isExist {
 			var randomString = utils.GenerateStringRandomly("", 6)
 
-			randomkey := fmt.Sprintf(ConstantAccountString, info.Email)
+			randomJWT, err := jwt.CreateJWT(map[string]interface{}{
+				"email":           info.Email,
+				"invitation_code": randomString,
+				"time":            time.Now().UTC().Unix(),
+			})
 
-			confirmUrl := fmt.Sprintf("%s/confirm?email=%s&invitation_code=%s", global.MARKET_CONFIG.Client.Url, info.Email, randomString)
-
-			if _, err = global.MARKET_REDIS.Set(context.Background(), randomkey, randomString, time.Minute*20).Result(); err != nil {
+			if err != nil {
 				global.MARKET_LOG.Error(err.Error())
-				return
+				return err
+			}
+
+			confirmUrl := fmt.Sprintf("%s/confirm?code=%s", global.MARKET_CONFIG.Client.Url, randomJWT)
+
+			if _, err = global.MARKET_REDIS.Set(context.Background(), randomJWT, randomString, time.Minute*20).Result(); err != nil {
+				global.MARKET_LOG.Error(err.Error())
+				return err
 			}
 
 			if err = mail.SendMail(info.Email, mail.UserLoginTemplate(info.Email, confirmUrl)); err != nil {
 				global.MARKET_LOG.Error(err.Error())
-				return
+				return err
 			}
 
 			return nil
 		} else {
-			return errors.New("Service error")
+			return errors.New("service error")
 		}
 
 	} else if info.Address != "" && info.ChainId != 0 {
@@ -85,26 +90,31 @@ func (m *MService) UserRegister(info request.UserRegister) (err error) {
 }
 
 func (m *MService) UserVerifyInvitation(info request.UserVerifyInvitation) (err error) {
-	if info.Email != "" && info.InvitationCode != "" {
-
-		randomkey := fmt.Sprintf(ConstantAccountString, info.Email)
-
-		code, err := global.MARKET_REDIS.Get(context.Background(), randomkey).Result()
+	if info.Code != "" {
+		claims, err := jwt.ValidateJWT(info.Code)
 		if err != nil {
-			global.MARKET_LOG.Error(err.Error())
 			return err
 		}
 
-		if code == info.InvitationCode {
+		email := claims["email"].(string)
+		invitation_code := claims["invitation_code"].(string)
+		// time := claims["time"]
+
+		invitation_code_for_redis, err := global.MARKET_REDIS.Get(context.Background(), info.Code).Result()
+		if err != nil {
+			return errors.New("not found the code")
+		}
+
+		if invitation_code == invitation_code_for_redis {
 			// initialze account
-			err = m.InitializeAccount(info.Email)
+			err = m.InitializeAccount(email)
 			if err != nil {
 				global.MARKET_LOG.Error(err.Error())
 				return err
 			}
 
 			// delete code for redis
-			_, err = global.MARKET_REDIS.Del(context.Background(), randomkey).Result()
+			_, err = global.MARKET_REDIS.Del(context.Background(), info.Code).Result()
 			if err != nil {
 				global.MARKET_LOG.Error(err.Error())
 				return err
@@ -112,11 +122,12 @@ func (m *MService) UserVerifyInvitation(info request.UserVerifyInvitation) (err 
 
 			return nil
 		} else {
-			return errors.New("Account is invalid")
+			return errors.New("code is invalid")
 		}
 
 	}
-	return errors.New(fmt.Sprintf("not found email or code: %s, %s", info.Email, info.InvitationCode))
+
+	return fmt.Errorf("not found the code: %s", info.Code)
 }
 
 func (n *MService) UserLogin(info request.UserLogin) (user response.User, err error) {
@@ -147,7 +158,7 @@ func (n *MService) UserLogin(info request.UserLogin) (user response.User, err er
 		// todo:
 	}
 
-	return user, errors.New("No support")
+	return user, errors.New("no support")
 }
 
 func (m *MService) InitializeAccount(email string) (err error) {

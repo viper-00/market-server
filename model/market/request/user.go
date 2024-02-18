@@ -7,8 +7,7 @@ type UserRegister struct {
 }
 
 type UserVerifyInvitation struct {
-	InvitationCode string `json:"invitation_code" form:"invitation_code" binding:"required"`
-	Email          string `json:"email" form:"email" binding:"required"`
+	Code string `json:"code" form:"code" binding:"required"`
 }
 
 type UserLogin struct {
