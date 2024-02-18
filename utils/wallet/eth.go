@@ -1,11 +1,18 @@
 package wallet
 
 import (
+	"context"
 	"crypto/ecdsa"
 	"errors"
+	"fmt"
+	"os"
 
+	"github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 func GenerateEthereumWallet() (error, string, string) {
@@ -28,49 +35,93 @@ func GenerateEthereumWallet() (error, string, string) {
 	return nil, pKey, address
 }
 
-// func GenerateEthereumContract() {
-// 	client, err := ethclient.Dial("https://ethereum-goerli.publicnode.com")
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
+var (
+	Transfer     = "transfer"
+	TransferFrom = "transferFrom"
 
-// 	privateKey, err := crypto.HexToECDSA("fad9c8855b740a0b7ed4c221dbad0f33a83a49cad6b3fe8d5817ac83d38b6a19")
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
+	CreateNewContract = "createNewContract"
 
-// 	publicKey := privateKey.Public()
-// 	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
-// 	if !ok {
-// 		log.Fatal("error casting public key to ECDSA")
-// 	}
+	knownMethods = map[string]string{
+		"0xa9059cbb": Transfer,
+		"0x23b872dd": TransferFrom,
 
-// 	fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
-// 	nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
+		"0x694e974c": CreateNewContract,
+	}
+)
 
-// 	gasPrice, err := client.SuggestGasPrice(context.Background())
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
+func GenerateEthereumCollectionContract(bindAddress string) (error, string) {
+	client, err := ethclient.Dial("https://sepolia.optimism.io")
+	if err != nil {
+		return err, ""
+	}
+	defer client.Close()
 
-// 	auth, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(5))
-// 	auth.Nonce = big.NewInt(int64(nonce))
-// 	auth.Value = big.NewInt(0)     // in wei
-// 	auth.GasLimit = uint64(300000) // in units
-// 	auth.GasPrice = gasPrice
+	file, err := os.Open("./market.json")
+	if err != nil {
+		return err, ""
+	}
+	defer file.Close()
 
-// 	input := "1.0"
+	contractAddress := common.HexToAddress("0xa04c49003a08485d927712c6678d828b644a013f")
 
-// 	address, tx, instance, err := bind.DeployContract(auth, client, []byte(""), nil)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
+	contractABI, err := abi.JSON(file)
+	if err != nil {
+		return err, ""
+	}
 
-// 	fmt.Println(address.Hex())   // 0x147B8eb97fD247D06C4006D269c90C1908Fb5D54
-// 	fmt.Println(tx.Hash().Hex()) // 0xdae8ba5444eefdc99f4d45cd0c4f24056cba6a02cefbf78066ef9f4188ff7dc0
+	callData, err := contractABI.Pack(CreateNewContract)
+	if err != nil {
+		return err, ""
+	}
 
-// 	_ = instance
-// }
+	msg := ethereum.CallMsg{
+		To:   &contractAddress,
+		Data: callData,
+	}
+
+	result, err := client.CallContract(context.Background(), msg, nil)
+	if err != nil {
+		return err, ""
+	}
+
+	// var returnValue *big.Int
+	inputsMap := make(map[string]interface{})
+
+	err = contractABI.UnpackIntoMap(inputsMap, CreateNewContract, result)
+	if err != nil {
+		return err, ""
+	}
+
+	fmt.Printf("Result of CreateNewContract: %s\n", inputsMap)
+
+	return nil, ""
+
+	// 	fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
+	// 	nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
+
+	// 	gasPrice, err := client.SuggestGasPrice(context.Background())
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
+
+	// 	auth, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(5))
+	// 	auth.Nonce = big.NewInt(int64(nonce))
+	// 	auth.Value = big.NewInt(0)     // in wei
+	// 	auth.GasLimit = uint64(300000) // in units
+	// 	auth.GasPrice = gasPrice
+
+	// 	input := "1.0"
+
+	// 	address, tx, instance, err := bind.DeployContract(auth, client, []byte(""), nil)
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
+
+	// 	fmt.Println(address.Hex())   // 0x147B8eb97fD247D06C4006D269c90C1908Fb5D54
+	// 	fmt.Println(tx.Hash().Hex()) // 0xdae8ba5444eefdc99f4d45cd0c4f24056cba6a02cefbf78066ef9f4188ff7dc0
+
+	// _ = instance
+}

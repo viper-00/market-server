@@ -10,7 +10,7 @@ func UserLoginTemplate(to string, loginUrl string) []byte {
 		"<h1>Predictmarket</h1>" +
 		"<p>Click the button below to log in to Predictmarket.</p>" +
 		"<p>This button will expire in 20 minutes.</p>" +
-		"<p><a href=\"" + loginUrl + "\">Log in to Polymarket</a></p>" +
+		"<p><a href=\"" + loginUrl + "\">Log in to Predictmarket</a></p>" +
 		"<p>Confirming this request will securely log you in using " + to + ".</p>" +
 		"<h2>- Predictmarket Team</h2>" +
 		"</body></html>\r\n")

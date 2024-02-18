@@ -1,13 +1,16 @@
 package wallet
 
 import (
+	"context"
 	"crypto/ecdsa"
 	"math/big"
 	"os"
 	"testing"
 
+	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
@@ -83,5 +86,60 @@ func TestDepolyContract(t *testing.T) {
 	t.Logf("Contract deployed at address: %s\n", contractAddress.Hex())
 
 	t.Fail()
+}
 
+func TestCallContract(t *testing.T) {
+	client, err := ethclient.Dial("https://sepolia.optimism.io")
+	if err != nil {
+		t.Log(err.Error())
+
+	}
+	defer client.Close()
+
+	file, err := os.Open("./market.json")
+	if err != nil {
+		t.Log(err.Error())
+
+	}
+	defer file.Close()
+
+	contractAddress := common.HexToAddress("0xa04c49003a08485d927712c6678d828b644a013f")
+
+	contractABI, err := abi.JSON(file)
+	if err != nil {
+		t.Log(err.Error())
+
+	}
+
+	addresses := make([]common.Address, 0)
+
+	callData, err := contractABI.Pack(CreateNewContract, addresses)
+	if err != nil {
+		t.Log(err.Error())
+
+	}
+
+	msg := ethereum.CallMsg{
+		To:   &contractAddress,
+		Data: callData,
+	}
+
+	result, err := client.CallContract(context.Background(), msg, nil)
+	if err != nil {
+		t.Log(err.Error())
+
+	}
+
+	// var returnValue *big.Int
+	inputsMap := make(map[string]interface{})
+
+	err = contractABI.UnpackIntoMap(inputsMap, CreateNewContract, result)
+	if err != nil {
+		t.Log(err.Error())
+
+	}
+
+	t.Logf("Result of CreateNewContract: %s\n", inputsMap)
+
+	t.Fail()
 }

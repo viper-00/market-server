@@ -167,10 +167,13 @@ func (m *MService) InitializeAccount(email string) (err error) {
 		return
 	}
 
+	wallet.GenerateEthereumWallet()
+
 	var user model.User
 	user.PrivateKey = privateKey
 	user.Address = address
 	user.Email = email
+	user.ContractAddress = ""
 	user.Status = 1
 
 	err = global.MARKET_DB.Save(&user).Error
