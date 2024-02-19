@@ -57,6 +57,7 @@ var (
 
 	OPSepoliaRPC = []string{
 		"https://sepolia.optimism.io",
+		"https://optimism-sepolia.blockpi.network/v1/rpc/public",
 	}
 
 	ArbitrumOneRPC = []string{
