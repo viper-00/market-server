@@ -76,7 +76,7 @@ func CallWalletTransactionCore(rpc, fromPrivateKey, fromPublicKey, toPublicKey s
 	return signedTx.Hash().Hex(), nil
 }
 
-func CallContractCore(rpc, contractAddress, contractFunc string) (interface{}, error) {
+func CallContractCore(rpc, contractAddress, contractFunc string, args ...interface{}) (interface{}, error) {
 	client, err := ethclient.Dial(rpc)
 	if err != nil {
 		return nil, err
@@ -94,7 +94,7 @@ func CallContractCore(rpc, contractAddress, contractFunc string) (interface{}, e
 		return nil, err
 	}
 
-	callData, err := contractABI.Pack(contractFunc)
+	callData, err := contractABI.Pack(contractFunc, args...)
 	if err != nil {
 		return nil, err
 	}

@@ -1,43 +1,26 @@
 package wallet
 
 import (
-	"context"
 	"crypto/ecdsa"
 	"errors"
-	"fmt"
+	"math/big"
 	"os"
 
-	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethclient"
 )
-
-func GenerateEthereumWallet() (error, string, string) {
-	privateKey, err := crypto.GenerateKey()
-	if err != nil {
-		return err, "", ""
-	}
-
-	privateKeyBytes := crypto.FromECDSA(privateKey)
-	pKey := hexutil.Encode(privateKeyBytes)[2:]
-
-	publicKey := privateKey.Public()
-	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
-	if !ok {
-		return errors.New("error casting public key to ECDSA"), "", ""
-	}
-
-	address := crypto.PubkeyToAddress(*publicKeyECDSA).Hex()
-
-	return nil, pKey, address
-}
 
 var (
 	Transfer     = "transfer"
 	TransferFrom = "transferFrom"
+	Name         = "name"
+	Symbol       = "symbol"
+	Decimals     = "decimals"
+	TotalSupply  = "totalSupply"
+	BalanceOf    = "balanceOf"
+	Approve      = "approve"
 
 	CreateNewContract = "createNewContract"
 
@@ -49,79 +32,186 @@ var (
 	}
 )
 
-func GenerateEthereumCollectionContract(bindAddress string) (error, string) {
-	client, err := ethclient.Dial("https://sepolia.optimism.io")
+func GenerateEthereumWallet() (string, string, error) {
+	privateKey, err := crypto.GenerateKey()
 	if err != nil {
-		return err, ""
+		return "", "", err
 	}
-	defer client.Close()
+
+	privateKeyBytes := crypto.FromECDSA(privateKey)
+	pKey := hexutil.Encode(privateKeyBytes)[2:]
+
+	publicKey := privateKey.Public()
+	publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
+	if !ok {
+		return "", "", errors.New("error casting public key to ECDSA")
+	}
+
+	address := crypto.PubkeyToAddress(*publicKeyECDSA).Hex()
+
+	return pKey, address, nil
+}
+
+func SendEthereumCollectionContract(rpc, fromPri, fromPub, contractAddress string, bindAddresses []string, gasLimit uint64) (hash string, err error) {
+	var value = big.NewInt(0)
 
 	file, err := os.Open("./market.json")
 	if err != nil {
-		return err, ""
+		return "", err
 	}
 	defer file.Close()
 
-	contractAddress := common.HexToAddress("0xa04c49003a08485d927712c6678d828b644a013f")
+	marketContractABI, err := abi.JSON(file)
+	if err != nil {
+		return "", err
+	}
+
+	var addresses = []common.Address{}
+	for _, v := range bindAddresses {
+		addresses = append(addresses, common.HexToAddress(v))
+	}
+
+	callData, err := marketContractABI.Pack(CreateNewContract, addresses)
+	if err != nil {
+		return "", err
+	}
+
+	hash, err = CallWalletTransactionCore(rpc, fromPri, fromPub, contractAddress, value, callData, gasLimit)
+	if err != nil {
+		return "", err
+	}
+
+	return
+}
+
+func CallEthTransfer(rpc, fromPri, fromPub, toAddress string, value *big.Int, gasLimit uint64) (hash string, err error) {
+	var data []byte
+	hash, err = CallWalletTransactionCore(rpc, fromPri, fromPub, toAddress, value, data, gasLimit)
+	if err != nil {
+		return "", err
+	}
+
+	return hash, nil
+}
+
+func CallTokenTransfer(rpc, fromPri, fromPub, toAddress, tokenAddress string, tokenValue *big.Int, gasLimit uint64) (hash string, err error) {
+	var value = big.NewInt(0)
+
+	file, err := os.Open("./erc20.json")
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
 
 	contractABI, err := abi.JSON(file)
 	if err != nil {
-		return err, ""
+		return "", err
 	}
 
-	callData, err := contractABI.Pack(CreateNewContract)
+	data, err := contractABI.Pack(Transfer, common.HexToAddress(toAddress), tokenValue)
 	if err != nil {
-		return err, ""
+		return "", err
 	}
 
-	msg := ethereum.CallMsg{
-		To:   &contractAddress,
-		Data: callData,
-	}
-
-	result, err := client.CallContract(context.Background(), msg, nil)
+	hash, err = CallWalletTransactionCore(rpc, fromPri, fromPub, tokenAddress, value, data, gasLimit)
 	if err != nil {
-		return err, ""
+		return "", err
 	}
 
-	// var returnValue *big.Int
-	inputsMap := make(map[string]interface{})
+	return hash, nil
+}
 
-	err = contractABI.UnpackIntoMap(inputsMap, CreateNewContract, result)
+func CallTokenTransferFrom(rpc, fromPri, fromPub, toAddress, tokenAddress string, tokenValue *big.Int, gasLimit uint64) (hash string, err error) {
+	var value = big.NewInt(0)
+
+	file, err := os.Open("./erc20.json")
 	if err != nil {
-		return err, ""
+		return "", err
+	}
+	defer file.Close()
+
+	contractABI, err := abi.JSON(file)
+	if err != nil {
+		return "", err
 	}
 
-	fmt.Printf("Result of CreateNewContract: %s\n", inputsMap)
+	data, err := contractABI.Pack(TransferFrom, common.HexToAddress(fromPub), common.HexToAddress(toAddress), tokenValue)
+	if err != nil {
+		return "", err
+	}
 
-	return nil, ""
+	hash, err = CallWalletTransactionCore(rpc, fromPri, fromPub, tokenAddress, value, data, gasLimit)
+	if err != nil {
+		return "", err
+	}
 
-	// 	fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA)
-	// 	nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
+	return hash, nil
+}
 
-	// 	gasPrice, err := client.SuggestGasPrice(context.Background())
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
+func CallTokenApprove(rpc, fromPri, fromPub, approveAddress, tokenAddress string, approveValue *big.Int, gasLimit uint64) (hash string, err error) {
+	var value = big.NewInt(0)
 
-	// 	auth, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(5))
-	// 	auth.Nonce = big.NewInt(int64(nonce))
-	// 	auth.Value = big.NewInt(0)     // in wei
-	// 	auth.GasLimit = uint64(300000) // in units
-	// 	auth.GasPrice = gasPrice
+	file, err := os.Open("./erc20.json")
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
 
-	// 	input := "1.0"
+	contractABI, err := abi.JSON(file)
+	if err != nil {
+		return "", err
+	}
 
-	// 	address, tx, instance, err := bind.DeployContract(auth, client, []byte(""), nil)
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
+	data, err := contractABI.Pack(Approve, common.HexToAddress(approveAddress), approveValue)
+	if err != nil {
+		return "", err
+	}
 
-	// 	fmt.Println(address.Hex())   // 0x147B8eb97fD247D06C4006D269c90C1908Fb5D54
-	// 	fmt.Println(tx.Hash().Hex()) // 0xdae8ba5444eefdc99f4d45cd0c4f24056cba6a02cefbf78066ef9f4188ff7dc0
+	hash, err = CallWalletTransactionCore(rpc, fromPri, fromPub, tokenAddress, value, data, gasLimit)
+	if err != nil {
+		return "", err
+	}
 
-	// _ = instance
+	return hash, nil
+}
+
+func CallTokenName(rpc, tokenAddress string) (result interface{}, err error) {
+	result, err = CallContractCore(rpc, tokenAddress, Name)
+	if err != nil {
+		return nil, err
+	}
+
+	return
+}
+
+func CallTokenSymbol(rpc, tokenAddress string) (result interface{}, err error) {
+	result, err = CallContractCore(rpc, tokenAddress, Symbol)
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+func CallTokenDecimals(rpc, tokenAddress string) (result interface{}, err error) {
+	result, err = CallContractCore(rpc, tokenAddress, Decimals)
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+func CallTokenTotalSupply(rpc, tokenAddress string) (result interface{}, err error) {
+	result, err = CallContractCore(rpc, tokenAddress, TotalSupply)
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+func CallTokenBalanceOf(rpc, fromPub, tokenAddress string) (result interface{}, err error) {
+	result, err = CallContractCore(rpc, tokenAddress, BalanceOf, common.HexToAddress(fromPub))
+	if err != nil {
+		return nil, err
+	}
+	return
 }

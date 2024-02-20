@@ -18,25 +18,25 @@ import (
 	"gorm.io/gorm"
 )
 
-func (m *MService) IsUserExist(email string) (error, bool) {
+func (m *MService) IsUserExist(email string) (bool, error) {
 	var user model.User
 	err := global.MARKET_DB.Where("email = ? AND status = 1", email).First(&user).Error
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, false
+		return false, err
 	}
 
 	if user.ID > 0 {
-		return nil, true
+		return true, err
 	}
 
-	return err, false
+	return false, err
 }
 
 func (m *MService) UserRegister(info request.UserRegister) error {
 	if info.Email != "" {
 
-		errExist, isExist := m.IsUserExist(info.Email)
+		isExist, errExist := m.IsUserExist(info.Email)
 		if isExist {
 			return errors.New("user already exists")
 		} else if errExist == nil && !isExist {
@@ -45,6 +45,7 @@ func (m *MService) UserRegister(info request.UserRegister) error {
 			randomJWT, err := jwt.CreateJWT(map[string]interface{}{
 				"email":           info.Email,
 				"invitation_code": randomString,
+				"chain_id":        info.ChainId,
 				"time":            time.Now().UTC().Unix(),
 			})
 
@@ -96,6 +97,7 @@ func (m *MService) UserVerifyInvitation(info request.UserVerifyInvitation) (err 
 			return err
 		}
 
+		chainId := claims["chain_id"].(int)
 		email := claims["email"].(string)
 		invitation_code := claims["invitation_code"].(string)
 		// time := claims["time"]
@@ -107,7 +109,7 @@ func (m *MService) UserVerifyInvitation(info request.UserVerifyInvitation) (err 
 
 		if invitation_code == invitation_code_for_redis {
 			// initialze account
-			err = m.InitializeAccount(email)
+			err = m.InitializeAccount(chainId, email)
 			if err != nil {
 				global.MARKET_LOG.Error(err.Error())
 				return err
@@ -142,6 +144,7 @@ func (n *MService) UserLogin(info request.UserLogin) (user response.User, err er
 		}
 
 		user.Auth, err = jwt.CreateJWT(map[string]interface{}{
+			"chain_id":        info.ChainId,
 			"email":           user.Email,
 			"address":         user.Address,
 			"contractAddress": user.ContractAddress,
@@ -161,20 +164,24 @@ func (n *MService) UserLogin(info request.UserLogin) (user response.User, err er
 	return user, errors.New("no support")
 }
 
-func (m *MService) InitializeAccount(email string) (err error) {
-	err, privateKey, address := wallet.GenerateEthereumWallet()
+func (m *MService) InitializeAccount(chainId int, email string) (err error) {
+	privateKey, address, err := wallet.GenerateEthereumWallet()
 	if err != nil {
 		return
 	}
 
-	wallet.GenerateEthereumWallet()
+	contractAddress, err := wallet.GenerateEthereumCollectionContract(chainId)
+	if err != nil {
+		return
+	}
 
 	var user model.User
 	user.PrivateKey = privateKey
 	user.Address = address
 	user.Email = email
-	user.ContractAddress = ""
+	user.ContractAddress = contractAddress
 	user.Status = 1
+	user.ChainId = chainId
 
 	err = global.MARKET_DB.Save(&user).Error
 	if err != nil {
