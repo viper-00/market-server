@@ -136,7 +136,7 @@ func SweepBlockchainTransaction(
 						}
 					} else {
 						// Ordinary erc20 transactions
-						isSupportContract, contractName, _, _ := sweepUtils.GetContractInfo(chainId, transaction.To)
+						isSupportContract, contractName, _, _ := sweepUtils.GetContractInfoByChainIdAndContractAddress(chainId, transaction.To)
 						if isSupportContract {
 							if erc20.IsHandleTokenTransaction(chainId, transaction.Hash, contractName, transaction.From, transaction.To, (*publicKey)[i], transaction.Input) {
 								isMonitorTx = true
@@ -242,13 +242,11 @@ func SweepBlockchainTransactionDetails(
 	if rpcDetail.Result.Input == "0x" {
 		handleERC20(chainId, publicKey, notifyRequest, rpcDetail)
 	} else {
-		_, contractName, _, _ := sweepUtils.GetContractInfo(chainId, rpcDetail.Result.To)
+		_, contractName, _, _ := sweepUtils.GetContractInfoByChainIdAndContractAddress(chainId, rpcDetail.Result.To)
 
 		switch contractName {
-		case constant.ALLINONE:
-			handleAllInOne(chainId, publicKey, notifyRequest, rpcDetail)
-		case constant.SWAP:
-			break
+		// case constant.ALLINONE:
+		// handleAllInOne(chainId, publicKey, notifyRequest, rpcDetail)
 		default:
 			handleERC20(chainId, publicKey, notifyRequest, rpcDetail)
 		}
@@ -273,7 +271,7 @@ func handleAllInOne(chainId int, publicKey *[]string, notifyRequest request.Noti
 	for i := 0; i < totalLen; i++ {
 		for _, v := range *publicKey {
 			if utils.HexToAddress(fromAddresses[i].String()) == utils.HexToAddress(v) {
-				isSupportContract, contractName, _, decimals := sweepUtils.GetContractInfo(chainId, tokens[i].String())
+				isSupportContract, contractName, _, decimals := sweepUtils.GetContractInfoByChainIdAndContractAddress(chainId, tokens[i].String())
 				if !isSupportContract {
 					continue
 				}
@@ -292,7 +290,7 @@ func handleAllInOne(chainId int, publicKey *[]string, notifyRequest request.Noti
 			}
 
 			if utils.HexToAddress(toAddresses[i].String()) == utils.HexToAddress(v) {
-				isSupportContract, contractName, _, decimals := sweepUtils.GetContractInfo(chainId, tokens[i].String())
+				isSupportContract, contractName, _, decimals := sweepUtils.GetContractInfoByChainIdAndContractAddress(chainId, tokens[i].String())
 				if !isSupportContract {
 					continue
 				}
@@ -324,9 +322,9 @@ func handleERC20(chainId int, publicKey *[]string, notifyRequest request.Notific
 	)
 
 	if rpcDetail.Result.Input == "0x" {
-		isSupportContract, contractName, _, decimals = sweepUtils.GetContractInfo(chainId, "0x0000000000000000000000000000000000000000")
+		isSupportContract, contractName, _, decimals = sweepUtils.GetContractInfoByChainIdAndContractAddress(chainId, "0x0000000000000000000000000000000000000000")
 	} else {
-		isSupportContract, contractName, _, decimals = sweepUtils.GetContractInfo(chainId, rpcDetail.Result.To)
+		isSupportContract, contractName, _, decimals = sweepUtils.GetContractInfoByChainIdAndContractAddress(chainId, rpcDetail.Result.To)
 	}
 
 	if !isSupportContract {
@@ -477,7 +475,7 @@ func SweepBlockchainPendingBlock(
 						}
 					} else {
 
-						isSupportContract, contractName, _, _ := sweepUtils.GetContractInfo(chainId, transaction.To)
+						isSupportContract, contractName, _, _ := sweepUtils.GetContractInfoByChainIdAndContractAddress(chainId, transaction.To)
 						if isSupportContract {
 							if erc20.IsHandleTokenTransaction(chainId, transaction.Hash, contractName, transaction.From, transaction.To, (*publicKey)[i], transaction.Input) {
 								isMonitorTx = true

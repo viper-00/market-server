@@ -21,6 +21,7 @@ func Gorm() *gorm.DB {
 func RegisterTables() {
 	db := global.MARKET_DB
 	if err := db.AutoMigrate(
+		model.Chain{},
 		model.User{},
 	); err != nil {
 		global.MARKET_LOG.Error("db: register table failed", zap.Error(err))

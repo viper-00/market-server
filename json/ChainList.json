@@ -6,18 +6,6 @@
     "networkId": 1,
     "coins": [
       {
-        "symbol": "ALLINONE",
-        "decimals": 0,
-        "contract": "0x1839a021C7562A1Ecc7025deAd6D872A890244c1",
-        "isMainCoin": false
-      },
-      {
-        "symbol": "SWAP",
-        "decimals": 0,
-        "contract": "0xf9c814da15db75f7857898bad52df7404539c4e7",
-        "isMainCoin": false
-      },
-      {
         "symbol": "ETH",
         "decimals": 18,
         "contract": "0x0000000000000000000000000000000000000000",
@@ -116,12 +104,6 @@
     "networkId": 5,
     "coins": [
       {
-        "symbol": "SWAP",
-        "decimals": 0,
-        "contract": "0x5708628cEf003ccBc7C792C1Bdb5a331Aa87F4f0",
-        "isMainCoin": false
-      },
-      {
         "symbol": "ETH",
         "decimals": 18,
         "contract": "0x0000000000000000000000000000000000000000",
@@ -171,12 +153,6 @@
     "chainId": 11155111,
     "networkId": 11155111,
     "coins": [
-      {
-        "symbol": "ALLINONE",
-        "decimals": 0,
-        "contract": "0xad09a97c21A9b11aD9ca1d730116fD7d3b514953",
-        "isMainCoin": false
-      },
       {
         "symbol": "ETH",
         "decimals": 18,
@@ -261,12 +237,6 @@
     "chainId": 728126428,
     "networkId": 728126428,
     "coins": [
-      {
-        "symbol": "ALLINONE",
-        "decimals": 0,
-        "contract": "TWMJ7Gqm1xUVdLojVoj38R5tyxdtWAEDF4",
-        "isMainCoin": false
-      },
       {
         "symbol": "TRX",
         "decimals": 6,
@@ -360,12 +330,6 @@
     "networkId": 3448148188,
     "coins": [
       {
-        "symbol": "ALLINONE",
-        "decimals": 0,
-        "contract": "TU39GNvmmtYSdwMrVn1uTZrEAhHMMu4XUq",
-        "isMainCoin": false
-      },
-      {
         "symbol": "TRX",
         "decimals": 6,
         "contract": "T9yD14Nj9j7xAB4dbGeiX9h8unkKHxuWwb",
@@ -397,12 +361,6 @@
     "chainId": 42161,
     "networkId": 42161,
     "coins": [
-      {
-        "symbol": "ALLINONE",
-        "decimals": 0,
-        "contract": "0xFeDbAC043FdAEA392E1b1BA882a4e0A19cd09115",
-        "isMainCoin": false
-      },
       {
         "symbol": "ETH",
         "decimals": 18,
@@ -472,12 +430,6 @@
     "networkId": 42170,
     "coins": [
       {
-        "symbol": "ALLINONE",
-        "decimals": 0,
-        "contract": "0x1839a021C7562A1Ecc7025deAd6D872A890244c1",
-        "isMainCoin": false
-      },
-      {
         "symbol": "ETH",
         "decimals": 18,
         "contract": "0x0000000000000000000000000000000000000000",
@@ -528,12 +480,6 @@
     "networkId": 421613,
     "coins": [
       {
-        "symbol": "ALLINONE",
-        "decimals": 0,
-        "contract": "0xAE9E12b22113f606675DFe89eEF913871541DD95",
-        "isMainCoin": false
-      },
-      {
         "symbol": "ETH",
         "decimals": 18,
         "contract": "0x0000000000000000000000000000000000000000",
@@ -566,12 +512,6 @@
     "networkId": 421614,
     "coins": [
       {
-        "symbol": "ALLINONE",
-        "decimals": 0,
-        "contract": "0x00ab5cfCcA17249c31B0F478c6058Cfd44166e4C",
-        "isMainCoin": false
-      },
-      {
         "symbol": "ETH",
         "decimals": 18,
         "contract": "0x0000000000000000000000000000000000000000",
@@ -597,12 +537,6 @@
     "chainId": 10,
     "networkId": 10,
     "coins": [
-      {
-        "symbol": "ALLINONE",
-        "decimals": 0,
-        "contract": "0xDdF69b8aDdA305E131C240203fe7f2D6E7Bea64f",
-        "isMainCoin": false
-      },
       {
         "symbol": "ETH",
         "decimals": 18,
@@ -678,9 +612,9 @@
     "networkId": 11155420,
     "coins": [
       {
-        "symbol": "ALLINONE",
+        "symbol": "PREDICTMARKET",
         "decimals": 0,
-        "contract": "0xcb880e028D8725edF47c4B8651d8D625d25FEF1A",
+        "contract": "0xA04C49003a08485D927712c6678d828b644a013f",
         "isMainCoin": false
       },
       {

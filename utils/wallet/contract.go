@@ -118,3 +118,18 @@ func CallContractCore(rpc, contractAddress, contractFunc string, args ...interfa
 
 	return unPackResult, nil
 }
+
+func GetTransactionByHash(rpc, hash string) (tx *types.Receipt, err error) {
+	client, err := ethclient.Dial(rpc)
+	if err != nil {
+		return
+	}
+	defer client.Close()
+
+	receipt, err := client.TransactionReceipt(context.Background(), common.HexToHash(hash))
+	if err != nil {
+		return
+	}
+
+	return receipt, nil
+}

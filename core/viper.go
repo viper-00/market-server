@@ -42,18 +42,17 @@ func Viper(path ...string) *viper.Viper {
 	v.SetConfigType("yaml")
 	err := v.ReadInConfig()
 	if err != nil {
-		global.MARKET_LOG.Error(err.Error())
 		panic(fmt.Errorf("error for config file: %s", err.Error()))
 	}
 	v.WatchConfig()
 	v.OnConfigChange(func(e fsnotify.Event) {
-		global.MARKET_LOG.Info(fmt.Sprintf("config file changed: %s", e.Name))
+		fmt.Sprintf("config file changed: %s", e.Name)
 		if err = v.Unmarshal(&global.MARKET_CONFIG); err != nil {
-			global.MARKET_LOG.Error(err.Error())
+			panic(fmt.Errorf("error for config file: %s", err.Error()))
 		}
 	})
 	if err = v.Unmarshal(&global.MARKET_CONFIG); err != nil {
-		global.MARKET_LOG.Error(err.Error())
+		panic(fmt.Errorf("error for config file: %s", err.Error()))
 	}
 
 	return v

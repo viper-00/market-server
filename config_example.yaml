@@ -75,3 +75,8 @@ smtp:
 
 client:
   url: 
+
+general-account:
+  op:
+    private-key: 
+    public-key: 

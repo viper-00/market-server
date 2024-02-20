@@ -314,3 +314,25 @@ func TestCallTokenBalanceOf(t *testing.T) {
 
 	t.Fail()
 }
+
+func TestCallGetContractAddressFromHash(t *testing.T) {
+	rpc := "https://optimism-sepolia.blockpi.network/v1/rpc/public"
+	hash := "0xea48f36c01add64c6bda581787cf28c6a18a8d5975c2ab2e12add3742dbf3fe6"
+
+	receipt, err := GetTransactionByHash(rpc, hash)
+	if err != nil {
+		t.Log(err.Error())
+	}
+
+	callContractAddress := "0xA04C49003a08485D927712c6678d828b644a013f"
+
+	for _, v := range receipt.Logs {
+		if common.HexToAddress(v.Topics[0].Hex()) == common.HexToAddress("0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0") &&
+			common.HexToAddress(v.Topics[1].Hex()) == common.HexToAddress("0x0000000000000000000000000000000000000000") &&
+			common.HexToAddress(v.Topics[2].Hex()) == common.HexToAddress(callContractAddress) {
+			t.Log(v.Address.String())
+		}
+	}
+
+	t.Fail()
+}

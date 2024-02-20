@@ -22,7 +22,7 @@ func IsChainJoinSweep(chainId int) bool {
 }
 
 // isContract, symbol, contractAddress, decimals
-func GetContractInfo(chainId int, contractAddress string) (bool, string, string, int) {
+func GetContractInfoByChainIdAndContractAddress(chainId int, contractAddress string) (bool, string, string, int) {
 	if !IsChainJoinSweep(chainId) {
 		return false, "", "", 0
 	}
@@ -67,5 +67,24 @@ func GetContractInfo(chainId int, contractAddress string) (bool, string, string,
 
 	}
 	return false, "", "", 0
+}
 
+// isContract, symbol, contractAddress, decimals
+func GetContractInfoByChainIdAndSymbol(chainId int, symbol string) (bool, string, string, int) {
+	if !IsChainJoinSweep(chainId) {
+		return false, "", "", 0
+	}
+
+	for _, element := range model.ChainList {
+		if element.ChainId != chainId {
+			continue
+		}
+
+		for _, coin := range element.Coins {
+			if coin.Symbol == symbol {
+				return true, coin.Symbol, coin.Contract, coin.Decimals
+			}
+		}
+	}
+	return false, "", "", 0
 }

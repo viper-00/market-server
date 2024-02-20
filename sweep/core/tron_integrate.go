@@ -251,7 +251,7 @@ func SweepTronBlockchainTransactionDetails(
 func handleTransferContractTx(chainId int, publicKey *[]string, notifyRequest request.NotificationRequest, txResponse response.TronGetTxResponse) {
 	var err error
 
-	isSupportContract, contractName, _, decimals := sweepUtils.GetContractInfo(chainId, "T9yD14Nj9j7xAB4dbGeiX9h8unkKHxuWwb")
+	isSupportContract, contractName, _, decimals := sweepUtils.GetContractInfoByChainIdAndContractAddress(chainId, "T9yD14Nj9j7xAB4dbGeiX9h8unkKHxuWwb")
 	if !isSupportContract {
 		return
 	}
@@ -309,7 +309,7 @@ func handleTriggerSmartContract(chainId int, publicKey *[]string, notifyRequest 
 			return
 		}
 
-		_, contractName, _, decimals := sweepUtils.GetContractInfo(chainId, contractAddress)
+		_, contractName, _, decimals := sweepUtils.GetContractInfoByChainIdAndContractAddress(chainId, contractAddress)
 
 		notifyRequest.Token = contractName
 		notifyRequest.Amount = utils.CalculateBalance(big.NewInt(int64(amountInt)), decimals)
@@ -337,7 +337,7 @@ func handleTriggerSmartContract(chainId int, publicKey *[]string, notifyRequest 
 			return
 		}
 
-		_, contractName, _, decimals := sweepUtils.GetContractInfo(chainId, contractAddress)
+		_, contractName, _, decimals := sweepUtils.GetContractInfoByChainIdAndContractAddress(chainId, contractAddress)
 
 		notifyRequest.Token = contractName
 		notifyRequest.Amount = utils.CalculateBalance(big.NewInt(int64(amountInt)), decimals)
@@ -359,7 +359,7 @@ func handleTronAllInOne(chainId int, publicKey *[]string, notifyRequest request.
 	}
 
 	for i := range fromAddresses {
-		isSupportContract, contractName, _, decimals := sweepUtils.GetContractInfo(chainId, tokens[i])
+		isSupportContract, contractName, _, decimals := sweepUtils.GetContractInfoByChainIdAndContractAddress(chainId, tokens[i])
 		if !isSupportContract {
 			continue
 		}

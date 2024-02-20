@@ -17,6 +17,16 @@ type Server struct {
 	Wss              Wss              `mapstructure:"wss" json:"wss" yaml:"wss"`
 	Smtp             Smtp             `mapstructure:"smtp" json:"smtp" yaml:"smtp"`
 	Client           Client           `mapstructure:"client" json:"client" yaml:"client"`
+	GeneralAccount   GeneralAccount   `mapstructure:"general-account" json:"general-account" yaml:"general-account"`
+}
+
+type GeneralAccount struct {
+	Op Op `mapstructure:"op" json:"op" yaml:"op"`
+}
+
+type Op struct {
+	PrivateKey string `mapstructure:"private-key" json:"private-key" yaml:"private-key"`
+	PublicKey  string `mapstructure:"public-key" json:"public-key" yaml:"public-key"`
 }
 
 type Client struct {

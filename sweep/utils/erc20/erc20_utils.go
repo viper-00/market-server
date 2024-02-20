@@ -54,10 +54,8 @@ func IsHandleTokenTransaction(chainId int, hash, contractName, fromAddress, cont
 	}
 
 	switch contractName {
-	case constant.ALLINONE:
-		return handleAllInOneTransaction(chainId, hash, fromAddress, contractAddress, monitorAddress, data)
-	case constant.SWAP:
-		break
+	// case constant.ALLINONE:
+	// return handleAllInOneTransaction(chainId, hash, fromAddress, contractAddress, monitorAddress, data)
 	default:
 		return handleERC20Transaction(chainId, hash, fromAddress, contractAddress, monitorAddress, data)
 	}

@@ -55,7 +55,7 @@ func GenerateEthereumWallet() (string, string, error) {
 func SendEthereumCollectionContract(rpc, fromPri, fromPub, contractAddress string, bindAddresses []string, gasLimit uint64) (hash string, err error) {
 	var value = big.NewInt(0)
 
-	file, err := os.Open("./market.json")
+	file, err := os.Open("json/Market.json")
 	if err != nil {
 		return "", err
 	}
@@ -97,7 +97,7 @@ func CallEthTransfer(rpc, fromPri, fromPub, toAddress string, value *big.Int, ga
 func CallTokenTransfer(rpc, fromPri, fromPub, toAddress, tokenAddress string, tokenValue *big.Int, gasLimit uint64) (hash string, err error) {
 	var value = big.NewInt(0)
 
-	file, err := os.Open("./erc20.json")
+	file, err := os.Open("json/ERC20.json")
 	if err != nil {
 		return "", err
 	}

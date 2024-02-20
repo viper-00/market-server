@@ -24,6 +24,5 @@ var (
 	OP       = "OP"
 	ARB      = "ARB"
 
-	SWAP     = "SWAP"
-	ALLINONE = "ALLINONE"
+	PREDICTMARKET = "PREDICTMARKET"
 )

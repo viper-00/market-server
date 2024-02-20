@@ -363,7 +363,7 @@ func HandleLtcTransactionDetailsByMempool(
 		return
 	}
 
-	_, _, _, decimals := sweepUtils.GetContractInfo(chainId, "")
+	_, _, _, decimals := sweepUtils.GetContractInfoByChainIdAndContractAddress(chainId, "")
 	if decimals == 0 {
 		return
 	}
