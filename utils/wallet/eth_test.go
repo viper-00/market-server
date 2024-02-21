@@ -26,7 +26,7 @@ func TestCallContract(t *testing.T) {
 	marketContractAddress := "0xa04c49003a08485d927712c6678d828b644a013f"
 	bindAddresses := []string{"0x4e16f68b13f15b40b0313f35E01bF2e6F636eB9a"}
 	gasLimit := uint64(1000000)
-	hash, err := SendEthereumCollectionContract(rpc, fromPri, fromPub, marketContractAddress, bindAddresses, gasLimit)
+	hash, err := CreateNewCollectionContract(rpc, fromPri, fromPub, marketContractAddress, bindAddresses, gasLimit)
 	if err != nil {
 		t.Log(err.Error())
 	}
@@ -34,83 +34,30 @@ func TestCallContract(t *testing.T) {
 	t.Log("hash", hash)
 
 	t.Fail()
+}
 
-	// client, err := ethclient.Dial("https://optimism-sepolia.blockpi.network/v1/rpc/public")
-	// if err != nil {
-	// 	t.Log(err.Error())
+func TestCallWithdrawByCollectionContract(t *testing.T) {
+	chainId := 17
+	rpc := "https://optimism-sepolia.blockpi.network/v1/rpc/public"
+	ownerPrivacyKey := ""
+	ownerPublicKey := "ownerPublicKey"
+	callContractAddress := ""
+	tokenAddresses := []string{}
+	sendToAddresses := []string{}
+	var sendValues = []big.Int{}
+	var gasLimit uint64
 
-	// }
-	// defer client.Close()
+	hash, err := CallWithdrawByCollectionContract(rpc, ownerPrivacyKey, ownerPublicKey, callContractAddress, tokenAddresses, sendToAddresses, sendValues, gasLimit)
+	if err != nil {
+		return
+	}
 
-	// file, err := os.Open("./market.json")
-	// if err != nil {
-	// 	t.Log(err.Error())
+	err = MonitorTxStatus(chainId, hash)
+	if err != nil {
+		t.Log(err.Error())
+	}
 
-	// }
-	// defer file.Close()
-
-	// contractABI, err := abi.JSON(file)
-	// if err != nil {
-	// 	t.Log(err.Error())
-
-	// }
-
-	// // addresses := make([]common.Address, 0)
-	// // addresses = append(addresses, )
-
-	// // 设置合约函数参数
-	// addresses := []common.Address{
-	// 	common.HexToAddress("0x4e16f68b13f15b40b0313f35E01bF2e6F636eB9a"),
-	// 	// 添加更多地址...
-	// }
-
-	// callData, err := contractABI.Pack(CreateNewContract, addresses)
-	// if err != nil {
-	// 	t.Log(err.Error())
-
-	// }
-
-	// privateKey, err := crypto.HexToECDSA("")
-	// if err != nil {
-	// 	t.Log(err)
-	// }
-
-	// fromAddress := common.HexToAddress("0x4e16f68b13f15b40b0313f35E01bF2e6F636eB9a")
-
-	// nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
-	// if err != nil {
-	// 	t.Log(err)
-	// }
-
-	// gasPrice, err := client.SuggestGasPrice(context.Background())
-	// if err != nil {
-	// 	t.Log(err)
-	// }
-
-	// gasLimit := uint64(1000000)
-
-	// contractAddress := common.HexToAddress("0xa04c49003a08485d927712c6678d828b644a013f")
-
-	// tx := types.NewTransaction(nonce, contractAddress, big.NewInt(0), gasLimit, gasPrice, callData)
-
-	// chainID, err := client.NetworkID(context.Background())
-	// if err != nil {
-	// 	t.Log(err)
-	// }
-
-	// signedTx, err := types.SignTx(tx, types.NewEIP155Signer(chainID), privateKey)
-	// if err != nil {
-	// 	t.Log(err)
-	// }
-
-	// err = client.SendTransaction(context.Background(), signedTx)
-	// if err != nil {
-	// 	t.Log(err)
-	// }
-
-	// t.Logf("tx sent: %s", signedTx.Hash().Hex())
-
-	// t.Fail()
+	t.Fail()
 }
 
 func TestCallEthTransfer(t *testing.T) {

@@ -23,6 +23,7 @@ var (
 	Approve      = "approve"
 
 	CreateNewContract = "createNewContract"
+	Withdraw          = "withdraw"
 
 	knownMethods = map[string]string{
 		"0xa9059cbb": Transfer,
@@ -52,7 +53,7 @@ func GenerateEthereumWallet() (string, string, error) {
 	return pKey, address, nil
 }
 
-func SendEthereumCollectionContract(rpc, fromPri, fromPub, contractAddress string, bindAddresses []string, gasLimit uint64) (hash string, err error) {
+func CreateNewCollectionContract(rpc, fromPri, fromPub, contractAddress string, bindAddresses []string, gasLimit uint64) (hash string, err error) {
 	var value = big.NewInt(0)
 
 	file, err := os.Open("json/Market.json")
@@ -72,6 +73,48 @@ func SendEthereumCollectionContract(rpc, fromPri, fromPub, contractAddress strin
 	}
 
 	callData, err := marketContractABI.Pack(CreateNewContract, addresses)
+	if err != nil {
+		return "", err
+	}
+
+	hash, err = CallWalletTransactionCore(rpc, fromPri, fromPub, contractAddress, value, callData, gasLimit)
+	if err != nil {
+		return "", err
+	}
+
+	return
+}
+
+func CallWithdrawByCollectionContract(rpc, fromPri, fromPub, contractAddress string, tokenAddresses, sendToAddresses []string, sendValues []big.Int, gasLimit uint64) (hash string, err error) {
+	var value = big.NewInt(0)
+
+	file, err := os.Open("json/Market.json")
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	marketContractABI, err := abi.JSON(file)
+	if err != nil {
+		return "", err
+	}
+
+	if len(tokenAddresses) != len(sendToAddresses) || len(tokenAddresses) != len(sendValues) || len(sendToAddresses) != len(sendValues) {
+		return "", errors.New("parameter not supported")
+	}
+
+	var tokens, tos = []common.Address{}, []common.Address{}
+	var values = []big.Int{}
+	for _, v := range tokenAddresses {
+		tokens = append(tokens, common.HexToAddress(v))
+	}
+	for _, v := range sendToAddresses {
+		tos = append(tos, common.HexToAddress(v))
+	}
+
+	values = append(values, sendValues...)
+
+	callData, err := marketContractABI.Pack(Withdraw, tokens, tos, values)
 	if err != nil {
 		return "", err
 	}

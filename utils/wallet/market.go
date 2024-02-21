@@ -6,11 +6,33 @@ import (
 	"market/global"
 	"market/global/constant"
 	"market/sweep/utils"
+	"math/big"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 )
+
+func UserWalletFromContract(chainId int, ownerPrivacyKey, ownerPublicKey, callContractAddress string, tokenAddresses, sendToAddresses []string, sendValues []big.Int) (err error) {
+	var gasLimit uint64 = 0
+
+	rpc := constant.GetRPCUrlByNetwork(chainId)
+	if rpc == "" {
+		return errors.New("chain not support")
+	}
+
+	isSupport, gasLimit := GetCallWithdrawContractGasLimitFromChainId(chainId)
+	if !isSupport {
+		return errors.New("chain not support")
+	}
+
+	hash, err := CallWithdrawByCollectionContract(rpc, ownerPrivacyKey, ownerPublicKey, callContractAddress, tokenAddresses, sendToAddresses, sendValues, gasLimit)
+	if err != nil {
+		return
+	}
+
+	return MonitorTxStatus(chainId, hash)
+}
 
 func GenerateEthereumCollectionContract(chainId int, ownerPublicKey string) (contractAddress string, err error) {
 	var gasLimit uint64 = 0
@@ -37,7 +59,7 @@ func GenerateEthereumCollectionContract(chainId int, ownerPublicKey string) (con
 
 	bindAddresses := []string{ownerPublicKey, generalPubAccount}
 
-	hash, err := SendEthereumCollectionContract(rpc, generalPriAccountm, generalPubAccount, contractAddress, bindAddresses, gasLimit)
+	hash, err := CreateNewCollectionContract(rpc, generalPriAccountm, generalPubAccount, contractAddress, bindAddresses, gasLimit)
 
 	if err != nil {
 		return "", err
@@ -69,6 +91,15 @@ func GetCallCreateContractGasLimitFromChainId(chainId int) (bool, uint64) {
 	return false, 0
 }
 
+func GetCallWithdrawContractGasLimitFromChainId(chainId int) (bool, uint64) {
+	switch chainId {
+	case constant.OP_SEPOLIA:
+		return true, 40000
+	}
+
+	return false, 0
+}
+
 func GetNewContractAddressByTxHash(chainId int, hash, callContractAddress string) (contractAddress string, err error) {
 	rpc := constant.GetRPCUrlByNetwork(chainId)
 	if rpc == "" {
@@ -87,7 +118,7 @@ func GetNewContractAddressByTxHash(chainId int, hash, callContractAddress string
 	}
 
 	if receipt.Status != 1 {
-		return "", errors.New("Transaction not included in block")
+		return "", errors.New("transaction not included in block")
 	}
 
 	for _, v := range receipt.Logs {
@@ -99,4 +130,28 @@ func GetNewContractAddressByTxHash(chainId int, hash, callContractAddress string
 	}
 
 	return "", errors.New("tx not support")
+}
+
+func MonitorTxStatus(chainId int, hash string) (err error) {
+	rpc := constant.GetRPCUrlByNetwork(chainId)
+	if rpc == "" {
+		return errors.New("chain not support")
+	}
+
+	var receipt *types.Receipt
+
+	for {
+		receipt, err = GetTransactionByHash(rpc, hash)
+		if err == nil {
+			break
+		}
+		time.Sleep(1)
+		global.MARKET_LOG.Info(fmt.Sprintf("retry the MonitorTxStatus, hash: %s, chainId: %d", hash, chainId))
+	}
+
+	if receipt.Status == 1 {
+		return nil
+	} else {
+		return errors.New("transaction failed")
+	}
 }
