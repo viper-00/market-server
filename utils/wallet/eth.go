@@ -88,7 +88,7 @@ func CreateNewCollectionContract(rpc, fromPri, fromPub, contractAddress string, 
 func CallWithdrawByCollectionContract(rpc, fromPri, fromPub, contractAddress string, tokenAddresses, sendToAddresses []string, sendValues []big.Int, gasLimit uint64) (hash string, err error) {
 	var value = big.NewInt(0)
 
-	file, err := os.Open("json/Market.json")
+	file, err := os.Open("market.json")
 	if err != nil {
 		return "", err
 	}
@@ -104,15 +104,16 @@ func CallWithdrawByCollectionContract(rpc, fromPri, fromPub, contractAddress str
 	}
 
 	var tokens, tos = []common.Address{}, []common.Address{}
-	var values = []big.Int{}
+	var values []*big.Int
 	for _, v := range tokenAddresses {
 		tokens = append(tokens, common.HexToAddress(v))
 	}
 	for _, v := range sendToAddresses {
 		tos = append(tos, common.HexToAddress(v))
 	}
-
-	values = append(values, sendValues...)
+	for _, v := range sendValues {
+		values = append(values, &v)
+	}
 
 	callData, err := marketContractABI.Pack(Withdraw, tokens, tos, values)
 	if err != nil {

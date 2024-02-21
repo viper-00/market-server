@@ -10,5 +10,5 @@ type Wallet struct {
 }
 
 func (Wallet) TableName() string {
-	return "market_wallets"
+	return "market_user_wallets"
 }

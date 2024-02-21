@@ -94,7 +94,7 @@ func GetCallCreateContractGasLimitFromChainId(chainId int) (bool, uint64) {
 func GetCallWithdrawContractGasLimitFromChainId(chainId int) (bool, uint64) {
 	switch chainId {
 	case constant.OP_SEPOLIA:
-		return true, 40000
+		return true, 60000
 	}
 
 	return false, 0
@@ -146,7 +146,7 @@ func MonitorTxStatus(chainId int, hash string) (err error) {
 			break
 		}
 		time.Sleep(1)
-		global.MARKET_LOG.Info(fmt.Sprintf("retry the MonitorTxStatus, hash: %s, chainId: %d", hash, chainId))
+		// global.MARKET_LOG.Info(fmt.Sprintf("retry the MonitorTxStatus, hash: %s, chainId: %d", hash, chainId))
 	}
 
 	if receipt.Status == 1 {

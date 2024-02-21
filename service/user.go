@@ -185,6 +185,8 @@ func (m *MService) InitializeAccount(chainId int, email string) (err error) {
 	user.ContractAddress = contractAddress
 	user.Status = 1
 	user.ChainId = chainId
+	user.SuperiorId = 0
+	user.InvitationCode = utils.GenerateStringRandomly("market_invite_code_", 8)
 
 	err = global.MARKET_DB.Save(&user).Error
 	if err != nil {

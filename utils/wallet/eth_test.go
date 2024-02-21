@@ -37,19 +37,19 @@ func TestCallContract(t *testing.T) {
 }
 
 func TestCallWithdrawByCollectionContract(t *testing.T) {
-	chainId := 17
+	chainId := 11155420
 	rpc := "https://optimism-sepolia.blockpi.network/v1/rpc/public"
 	ownerPrivacyKey := ""
-	ownerPublicKey := "ownerPublicKey"
-	callContractAddress := ""
-	tokenAddresses := []string{}
-	sendToAddresses := []string{}
-	var sendValues = []big.Int{}
-	var gasLimit uint64
+	ownerPublicKey := "0x4e16f68b13f15b40b0313f35E01bF2e6F636eB9a"
+	callContractAddress := "0x25192b842Ce60660b1C73d53a2C0E0a69c871D88"
+	tokenAddresses := []string{"0xf93d3ae82636bd3d2f62c3ece339f2171f022fc0"}
+	sendToAddresses := []string{"0x4e16f68b13f15b40b0313f35E01bF2e6F636eB9a"}
+	var sendValues = []big.Int{*big.NewInt(1000000)}
+	var gasLimit uint64 = 60000
 
 	hash, err := CallWithdrawByCollectionContract(rpc, ownerPrivacyKey, ownerPublicKey, callContractAddress, tokenAddresses, sendToAddresses, sendValues, gasLimit)
 	if err != nil {
-		return
+		t.Log(err.Error())
 	}
 
 	err = MonitorTxStatus(chainId, hash)
