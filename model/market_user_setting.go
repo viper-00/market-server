@@ -2,7 +2,7 @@ package model
 
 import "market/model/common"
 
-type Setting struct {
+type UserSetting struct {
 	common.MARKET_MODEL
 	UserId    uint   `json:"user_id" gorm:"user_id"`
 	Email     string `json:"email" gorm:"comment:email"`
@@ -11,6 +11,6 @@ type Setting struct {
 	Bio       string `json:"bio" gorm:"comment:bio"`
 }
 
-func (Setting) TableName() string {
+func (UserSetting) TableName() string {
 	return "market_user_settings"
 }

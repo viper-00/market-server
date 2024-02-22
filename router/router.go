@@ -23,7 +23,6 @@ func (mRouter *MainRouter) InitRouter(Router *gin.RouterGroup) {
 		internalRouter.GET("getTransactionByChainAndHash", api.GetTransactionByChainAndHash)
 		internalRouter.GET("getTransactionsByChainAndAddress", api.GetTransactionsByChainAndAddress)
 		internalRouter.POST("sendMessageToTelegram", api.SendMessageToTelegram)
-		internalRouter.POST("revokeTelegramKey", api.RevokeTelegramKey)
 	}
 
 	internalRouter.Use(middleware.Wss())

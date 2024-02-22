@@ -214,27 +214,3 @@ func (n *MarketApi) SendMessageToTelegram(c *gin.Context) {
 	res = common.OKWithData(result)
 	c.JSON(http.StatusOK, res)
 }
-
-func (n *MarketApi) RevokeTelegramKey(c *gin.Context) {
-	var res common.Response
-	var key request.RevokeTelegramKey
-
-	err := c.ShouldBind(&key)
-	if err != nil {
-		global.MARKET_LOG.Error(err.Error())
-		res = common.FailWithMessage(err.Error())
-		c.JSON(http.StatusOK, res)
-		return
-	}
-
-	err = service.MarketService.RevokeTelegramKey(key)
-	if err != nil {
-		global.MARKET_LOG.Error(err.Error(), zap.Error(err))
-		res = common.FailWithMessage(err.Error())
-		c.JSON(http.StatusOK, res)
-		return
-	}
-
-	res = common.OkWithMessage("revoke successfully")
-	c.JSON(http.StatusOK, res)
-}
