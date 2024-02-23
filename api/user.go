@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 )
 
 func (n *MarketApi) Register(c *gin.Context) {
@@ -25,7 +24,7 @@ func (n *MarketApi) Register(c *gin.Context) {
 
 	err = service.MarketService.UserRegister(user)
 	if err != nil {
-		global.MARKET_LOG.Error(err.Error(), zap.Error(err))
+		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage(err.Error())
 		c.JSON(http.StatusOK, res)
 		return
@@ -49,7 +48,7 @@ func (n *MarketApi) VerifyInvitation(c *gin.Context) {
 
 	err = service.MarketService.UserVerifyInvitation(invitation)
 	if err != nil {
-		global.MARKET_LOG.Error(err.Error(), zap.Error(err))
+		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage(err.Error())
 		c.JSON(http.StatusOK, res)
 		return
@@ -73,7 +72,118 @@ func (n *MarketApi) Login(c *gin.Context) {
 
 	result, err := service.MarketService.UserLogin(user)
 	if err != nil {
-		global.MARKET_LOG.Error(err.Error(), zap.Error(err))
+		global.MARKET_LOG.Error(err.Error())
+		res = common.FailWithMessage(err.Error())
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
+	res = common.OKWithData(result)
+	c.JSON(http.StatusOK, res)
+}
+
+func (n *MarketApi) GetUserInfo(c *gin.Context) {
+	var res common.Response
+
+	result, err := service.MarketService.GetUserInfo()
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		res = common.FailWithMessage(err.Error())
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
+	res = common.OKWithData(result)
+	c.JSON(http.StatusOK, res)
+}
+
+func (n *MarketApi) UpdateUserInfo(c *gin.Context) {
+	var res common.Response
+	var user request.UpdateUserInfo
+
+	err := c.ShouldBind(&user)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		res = common.FailWithMessage(err.Error())
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
+	result, err := service.MarketService.UpdateUserInfo(user)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		res = common.FailWithMessage(err.Error())
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
+	res = common.OKWithData(result)
+	c.JSON(http.StatusOK, res)
+}
+
+func (n *MarketApi) UpdateUserSetting(c *gin.Context) {
+	var res common.Response
+	var user request.UpdateUserSetting
+
+	err := c.ShouldBind(&user)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		res = common.FailWithMessage(err.Error())
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
+	result, err := service.MarketService.UpdateUserSetting(user)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		res = common.FailWithMessage(err.Error())
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
+	res = common.OKWithData(result)
+	c.JSON(http.StatusOK, res)
+}
+
+func (n *MarketApi) UpdateUserNotificationSetting(c *gin.Context) {
+	var res common.Response
+	var user request.UpdateUserNotificationSetting
+
+	err := c.ShouldBind(&user)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		res = common.FailWithMessage(err.Error())
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
+	result, err := service.MarketService.UpdateUserNotificationSetting(user)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		res = common.FailWithMessage(err.Error())
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
+	res = common.OKWithData(result)
+	c.JSON(http.StatusOK, res)
+}
+
+func (n *MarketApi) CreateUserAffiliate(c *gin.Context) {
+	var res common.Response
+	var user request.CreateUserAffiliate
+
+	err := c.ShouldBind(&user)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		res = common.FailWithMessage(err.Error())
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
+	result, err := service.MarketService.CreateUserAffiliate(user)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage(err.Error())
 		c.JSON(http.StatusOK, res)
 		return

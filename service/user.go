@@ -196,3 +196,23 @@ func (m *MService) InitializeAccount(chainId int, email string) (err error) {
 
 	return nil
 }
+
+func (m *MService) GetUserInfo() (result interface{}, err error) {
+	return
+}
+
+func (m *MService) UpdateUserInfo(req request.UpdateUserInfo) (result interface{}, err error) {
+	return
+}
+
+func (m *MService) UpdateUserSetting(req request.UpdateUserSetting) (result interface{}, err error) {
+	return
+}
+
+func (m *MService) UpdateUserNotificationSetting(req request.UpdateUserNotificationSetting) (result interface{}, err error) {
+	return
+}
+
+func (m *MService) CreateUserAffiliate(req request.CreateUserAffiliate) (result interface{}, err error) {
+	return
+}

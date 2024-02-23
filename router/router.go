@@ -40,4 +40,38 @@ func (mRouter *MainRouter) InitRouter(Router *gin.RouterGroup) {
 		clientRouter.POST("login", api.Login)
 	}
 
+	userRouter := clientRouter.Group("/user")
+	{
+		userRouter.GET("user-info", api.GetUserInfo)
+		userRouter.PUT("user-info", api.UpdateUserInfo)
+		userRouter.PUT("user-setting", api.UpdateUserSetting)
+		userRouter.PUT("user-notification-setting", api.UpdateUserNotificationSetting)
+		userRouter.POST("user-affiliate", api.CreateUserAffiliate)
+	}
+
+	eventRouter := clientRouter.Group("/event")
+	{
+		eventRouter.POST("market-event", api.CreateMarketEvent)
+		eventRouter.PUT("market-event", api.UpdateMarketEvent)
+		eventRouter.POST("market-event-play", api.CreateMarketEventPlay)
+		eventRouter.PUT("market-event-play", api.UpdateMarketEventPlay)
+	}
+
+	commentRouter := eventRouter.Group("/comment")
+	{
+		commentRouter.POST("market-event-comment", api.CreateEventComment)
+		commentRouter.GET("market-event-comment", api.FindEventComment)
+		commentRouter.DELETE("market-event-comment", api.RemoveEventComment)
+	}
+
+	likeRouter := eventRouter.Group("/like")
+	{
+		likeRouter.POST("market-event-comment-like", api.CreateCommentLike)
+		likeRouter.PUT("market-event-comment-like", api.UpdateCommentLike)
+	}
+
+	uploadRouter := eventRouter.Group("upload")
+	{
+		uploadRouter.POST("uploadFile", api.UploadFile)
+	}
 }

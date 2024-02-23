@@ -81,6 +81,7 @@ type System struct {
 	UseRedis     bool   `mapstructure:"use-redis" json:"use-redis" yaml:"use-redis"`
 	UseInit      bool   `mapstructure:"use-init" json:"use-init" yaml:"use-init"`
 	UseTask      bool   `mapstructure:"use-task" json:"use-task" yaml:"use-task"`
+	FileUrl      string `mapstructure:"file-url" json:"file-url" yaml:"file-url"`
 }
 
 type Redis struct {

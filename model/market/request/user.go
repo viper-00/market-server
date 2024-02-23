@@ -15,3 +15,12 @@ type UserLogin struct {
 	Address string `json:"address" form:"address"`
 	ChainId int    `json:"chain_id" form:"chain_id" binding:"required"`
 }
+
+type UpdateUserInfo struct {
+}
+
+type UpdateUserSetting struct{}
+
+type UpdateUserNotificationSetting struct{}
+
+type CreateUserAffiliate struct{}
