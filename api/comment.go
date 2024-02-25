@@ -22,7 +22,7 @@ func (n *MarketApi) CreateEventComment(c *gin.Context) {
 		return
 	}
 
-	result, err := service.MarketService.CreateEventComment(comment)
+	result, err := service.MarketService.CreateEventComment(c, comment)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage(err.Error())
@@ -46,7 +46,7 @@ func (n *MarketApi) FindEventComment(c *gin.Context) {
 		return
 	}
 
-	result, err := service.MarketService.FindEventComment(comment)
+	result, err := service.MarketService.FindEventComment(c, comment)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage(err.Error())
@@ -70,7 +70,7 @@ func (n *MarketApi) RemoveEventComment(c *gin.Context) {
 		return
 	}
 
-	result, err := service.MarketService.RemoveEventComment(comment)
+	result, err := service.MarketService.RemoveEventComment(c, comment)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage(err.Error())

@@ -1,11 +1,15 @@
 package service
 
-import "market/model/market/request"
+import (
+	"market/model/market/request"
 
-func (m *MService) CreateCommentLike(req request.CreateCommentLike) (result interface{}, err error) {
+	"github.com/gin-gonic/gin"
+)
+
+func (m *MService) CreateCommentLike(c *gin.Context, req request.CreateCommentLike) (result interface{}, err error) {
 	return
 }
 
-func (m *MService) UpdateCommentLike(req request.UpdateCommentLike) (result interface{}, err error) {
+func (m *MService) UpdateCommentLike(c *gin.Context, req request.UpdateCommentLike) (result interface{}, err error) {
 	return
 }

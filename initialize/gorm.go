@@ -23,6 +23,13 @@ func RegisterTables() {
 	if err := db.AutoMigrate(
 		model.Chain{},
 		model.User{},
+		model.UserSetting{},
+		model.UserNotificationSetting{},
+		model.UserAffiliate{},
+		model.Event{},
+		model.EventComment{},
+		model.EventCommentLike{},
+		model.EventPlay{},
 	); err != nil {
 		global.MARKET_LOG.Error("db: register table failed", zap.Error(err))
 		os.Exit(0)

@@ -2,11 +2,11 @@ package model
 
 import "market/model/common"
 
-type Affiliate struct {
+type UserAffiliate struct {
 	common.MARKET_MODEL
-	ChainId int `json:"chain_id" gorm:"comment:chain_id"`
+	UserId uint `json:"user_id" gorm:"user_id"`
 }
 
-func (Affiliate) TableName() string {
+func (UserAffiliate) TableName() string {
 	return "market_user_affiliates"
 }

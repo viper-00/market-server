@@ -15,6 +15,7 @@ import (
 	"market/utils/wallet"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
@@ -135,7 +136,15 @@ func (m *MService) UserVerifyInvitation(info request.UserVerifyInvitation) (err 
 
 func (n *MService) UserLogin(info request.UserLogin) (user response.User, err error) {
 	if info.Email != "" {
-		err = global.MARKET_DB.Where("email = ? AND status = 1", info.Email).First(&user).Error
+		var modelUser model.User
+		err = global.MARKET_DB.Where("email = ? AND status = 1", info.Email).First(&modelUser).Error
+		if err != nil {
+			global.MARKET_LOG.Error(err.Error())
+			return
+		}
+
+		var modelUserSetting model.UserSetting
+		err = global.MARKET_DB.Where("user_id = ? AND status = 1", modelUser.ID).First(&modelUserSetting).Error
 		if err != nil {
 			global.MARKET_LOG.Error(err.Error())
 			return
@@ -143,9 +152,9 @@ func (n *MService) UserLogin(info request.UserLogin) (user response.User, err er
 
 		jwtString, jwtErr := jwt.CreateJWT(map[string]interface{}{
 			"chain_id":        info.ChainId,
-			"email":           user.Email,
-			"address":         user.Address,
-			"contractAddress": user.ContractAddress,
+			"email":           modelUser.Email,
+			"address":         modelUser.Address,
+			"contractAddress": modelUser.ContractAddress,
 			"time":            time.Now().UTC().Unix(),
 		})
 
@@ -154,7 +163,21 @@ func (n *MService) UserLogin(info request.UserLogin) (user response.User, err er
 			return
 		}
 
+		user.ChainId = modelUser.ChainId
+		user.Address = modelUser.Address
+		user.ContractAddress = modelUser.ContractAddress
+		user.Email = modelUser.Email
 		user.Auth = fmt.Sprintf("Bearer %s", jwtString)
+		user.InviteCode = modelUser.InvitationCode
+		user.UserName = modelUserSetting.Username
+		user.AvatarUrl = modelUserSetting.AvatarUrl
+		user.Bio = modelUserSetting.Bio
+		user.JoinedDate = modelUser.CreatedAt.Unix()
+
+		if _, err = global.MARKET_REDIS.Set(context.Background(), user.Auth, info.Email, time.Minute*20).Result(); err != nil {
+			global.MARKET_LOG.Error(err.Error())
+			return
+		}
 
 		return user, nil
 
@@ -178,6 +201,7 @@ func (m *MService) InitializeAccount(chainId int, email string) (err error) {
 		return
 	}
 
+	// default wallet for user
 	var user model.User
 	user.PrivateKey = privateKey
 	user.Address = address
@@ -187,8 +211,32 @@ func (m *MService) InitializeAccount(chainId int, email string) (err error) {
 	user.ChainId = chainId
 	user.SuperiorId = 0
 	user.InvitationCode = utils.GenerateStringRandomly("market_invite_code_", 8)
-
 	err = global.MARKET_DB.Save(&user).Error
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return
+	}
+
+	// user info of setting
+	var userSetting model.UserSetting
+	userSetting.UserId = user.ID
+	userSetting.Email = user.Email
+	userSetting.Username = utils.GenerateStringRandomly("", 8)
+	userSetting.AvatarUrl = ""
+	userSetting.Bio = ""
+	userSetting.Status = 1
+	err = global.MARKET_DB.Save(&userSetting).Error
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return
+	}
+
+	// user notification of setting
+	var userNotificationSetting model.UserNotificationSetting
+	userNotificationSetting.UserId = user.ID
+	userNotificationSetting.Email = user.Email
+	userNotificationSetting.MarketUpdate = false
+	err = global.MARKET_DB.Save(&userNotificationSetting).Error
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		return
@@ -197,22 +245,29 @@ func (m *MService) InitializeAccount(chainId int, email string) (err error) {
 	return nil
 }
 
-func (m *MService) GetUserInfo() (result interface{}, err error) {
+// value, _ := c.Get("chainId")
+// c.Set("chainId", chainId)
+// c.Set("email", email)
+// c.Set("address", address)
+// c.Set("contractAddress", contractAddress)
+// c.Set("time", time)
+
+func (m *MService) GetUserInfo(c *gin.Context) (result interface{}, err error) {
 	return
 }
 
-func (m *MService) UpdateUserInfo(req request.UpdateUserInfo) (result interface{}, err error) {
+func (m *MService) UpdateUserInfo(c *gin.Context, req request.UpdateUserInfo) (result interface{}, err error) {
 	return
 }
 
-func (m *MService) UpdateUserSetting(req request.UpdateUserSetting) (result interface{}, err error) {
+func (m *MService) UpdateUserSetting(c *gin.Context, req request.UpdateUserSetting) (result interface{}, err error) {
 	return
 }
 
-func (m *MService) UpdateUserNotificationSetting(req request.UpdateUserNotificationSetting) (result interface{}, err error) {
+func (m *MService) UpdateUserNotificationSetting(c *gin.Context, req request.UpdateUserNotificationSetting) (result interface{}, err error) {
 	return
 }
 
-func (m *MService) CreateUserAffiliate(req request.CreateUserAffiliate) (result interface{}, err error) {
+func (m *MService) CreateUserAffiliate(c *gin.Context, req request.CreateUserAffiliate) (result interface{}, err error) {
 	return
 }

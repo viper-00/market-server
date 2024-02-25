@@ -85,7 +85,7 @@ func (n *MarketApi) Login(c *gin.Context) {
 func (n *MarketApi) GetUserInfo(c *gin.Context) {
 	var res common.Response
 
-	result, err := service.MarketService.GetUserInfo()
+	result, err := service.MarketService.GetUserInfo(c)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage(err.Error())
@@ -109,7 +109,7 @@ func (n *MarketApi) UpdateUserInfo(c *gin.Context) {
 		return
 	}
 
-	result, err := service.MarketService.UpdateUserInfo(user)
+	result, err := service.MarketService.UpdateUserInfo(c, user)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage(err.Error())
@@ -133,7 +133,7 @@ func (n *MarketApi) UpdateUserSetting(c *gin.Context) {
 		return
 	}
 
-	result, err := service.MarketService.UpdateUserSetting(user)
+	result, err := service.MarketService.UpdateUserSetting(c, user)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage(err.Error())
@@ -157,7 +157,7 @@ func (n *MarketApi) UpdateUserNotificationSetting(c *gin.Context) {
 		return
 	}
 
-	result, err := service.MarketService.UpdateUserNotificationSetting(user)
+	result, err := service.MarketService.UpdateUserNotificationSetting(c, user)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage(err.Error())
@@ -181,7 +181,7 @@ func (n *MarketApi) CreateUserAffiliate(c *gin.Context) {
 		return
 	}
 
-	result, err := service.MarketService.CreateUserAffiliate(user)
+	result, err := service.MarketService.CreateUserAffiliate(c, user)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage(err.Error())

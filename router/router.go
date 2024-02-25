@@ -41,6 +41,7 @@ func (mRouter *MainRouter) InitRouter(Router *gin.RouterGroup) {
 	}
 
 	userRouter := clientRouter.Group("/user")
+	userRouter.Use(middleware.ClientAuth())
 	{
 		userRouter.GET("user-info", api.GetUserInfo)
 		userRouter.PUT("user-info", api.UpdateUserInfo)
@@ -50,6 +51,7 @@ func (mRouter *MainRouter) InitRouter(Router *gin.RouterGroup) {
 	}
 
 	eventRouter := clientRouter.Group("/event")
+	eventRouter.Use(middleware.ClientAuth())
 	{
 		eventRouter.POST("market-event", api.CreateMarketEvent)
 		eventRouter.PUT("market-event", api.UpdateMarketEvent)
@@ -58,6 +60,7 @@ func (mRouter *MainRouter) InitRouter(Router *gin.RouterGroup) {
 	}
 
 	commentRouter := eventRouter.Group("/comment")
+	commentRouter.Use(middleware.ClientAuth())
 	{
 		commentRouter.POST("market-event-comment", api.CreateEventComment)
 		commentRouter.GET("market-event-comment", api.FindEventComment)
@@ -65,12 +68,14 @@ func (mRouter *MainRouter) InitRouter(Router *gin.RouterGroup) {
 	}
 
 	likeRouter := eventRouter.Group("/like")
+	likeRouter.Use(middleware.ClientAuth())
 	{
 		likeRouter.POST("market-event-comment-like", api.CreateCommentLike)
 		likeRouter.PUT("market-event-comment-like", api.UpdateCommentLike)
 	}
 
-	uploadRouter := eventRouter.Group("upload")
+	uploadRouter := clientRouter.Group("upload")
+	uploadRouter.Use(middleware.ClientAuth())
 	{
 		uploadRouter.POST("uploadFile", api.UploadFile)
 	}

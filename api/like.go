@@ -22,7 +22,7 @@ func (n *MarketApi) CreateCommentLike(c *gin.Context) {
 		return
 	}
 
-	result, err := service.MarketService.CreateCommentLike(like)
+	result, err := service.MarketService.CreateCommentLike(c, like)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage(err.Error())
@@ -46,7 +46,7 @@ func (n *MarketApi) UpdateCommentLike(c *gin.Context) {
 		return
 	}
 
-	result, err := service.MarketService.UpdateCommentLike(like)
+	result, err := service.MarketService.UpdateCommentLike(c, like)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage(err.Error())

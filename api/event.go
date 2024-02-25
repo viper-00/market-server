@@ -22,7 +22,7 @@ func (n *MarketApi) CreateMarketEvent(c *gin.Context) {
 		return
 	}
 
-	result, err := service.MarketService.CreateMarketEvent(event)
+	result, err := service.MarketService.CreateMarketEvent(c, event)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage(err.Error())
@@ -46,7 +46,7 @@ func (n *MarketApi) UpdateMarketEvent(c *gin.Context) {
 		return
 	}
 
-	result, err := service.MarketService.UpdateMarketEvent(event)
+	result, err := service.MarketService.UpdateMarketEvent(c, event)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage(err.Error())
@@ -70,7 +70,7 @@ func (n *MarketApi) CreateMarketEventPlay(c *gin.Context) {
 		return
 	}
 
-	result, err := service.MarketService.CreateMarketEventPlay(event)
+	result, err := service.MarketService.CreateMarketEventPlay(c, event)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage(err.Error())
@@ -94,7 +94,7 @@ func (n *MarketApi) UpdateMarketEventPlay(c *gin.Context) {
 		return
 	}
 
-	result, err := service.MarketService.UpdateMarketEventPlay(event)
+	result, err := service.MarketService.UpdateMarketEventPlay(c, event)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage(err.Error())
