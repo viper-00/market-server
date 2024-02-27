@@ -197,3 +197,20 @@ var AllPendingTx = []string{
 	OP_PENDING_TRANSACTION,
 	OP_SEPOLIA_PENDING_TRANSACTION,
 }
+
+type NotificationType string
+
+var (
+	INCOMING NotificationType = "incoming"
+	OUTGOING NotificationType = "outgoing"
+	SYSTEM   NotificationType = "system"
+	OTHER    NotificationType = "other"
+)
+
+type ReadStatus int
+
+var (
+	DELETE ReadStatus = 0
+	UNREAD ReadStatus = 1
+	READ   ReadStatus = 2
+)

@@ -149,135 +149,135 @@ func SetupPublicKey(ctx context.Context) {
 		}
 	}
 
-	var wallets []model.Wallet
-	err = global.MARKET_DB.Select("chain_id", "address").Find(&wallets).Error
+	var users []model.User
+	err = global.MARKET_DB.Select("chain_id", "contract_address").Find(&users).Error
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		return
 	}
 
-	if len(wallets) > 0 {
-		for _, w := range wallets {
+	if len(users) > 0 {
+		for _, w := range users {
 			switch w.ChainId {
 			case constant.ETH_MAINNET:
-				_, err = global.MARKET_REDIS.RPush(ctx, constant.ETH_PUBLIC_KEY, w.Address).Result()
+				_, err = global.MARKET_REDIS.RPush(ctx, constant.ETH_PUBLIC_KEY, w.ContractAddress).Result()
 				if err != nil {
 					global.MARKET_LOG.Error(err.Error())
 					return
 				}
-				EthPublicKey = append(EthPublicKey, w.Address)
+				EthPublicKey = append(EthPublicKey, w.ContractAddress)
 			case constant.ETH_GOERLI:
-				_, err = global.MARKET_REDIS.RPush(ctx, constant.ETH_GOERLI_PUBLIC_KEY, w.Address).Result()
+				_, err = global.MARKET_REDIS.RPush(ctx, constant.ETH_GOERLI_PUBLIC_KEY, w.ContractAddress).Result()
 				if err != nil {
 					global.MARKET_LOG.Error(err.Error())
 					return
 				}
-				EthGoerliPublicKey = append(EthGoerliPublicKey, w.Address)
+				EthGoerliPublicKey = append(EthGoerliPublicKey, w.ContractAddress)
 			case constant.ETH_SEPOLIA:
-				_, err = global.MARKET_REDIS.RPush(ctx, constant.ETH_SEPOLIA_PUBLIC_KEY, w.Address).Result()
+				_, err = global.MARKET_REDIS.RPush(ctx, constant.ETH_SEPOLIA_PUBLIC_KEY, w.ContractAddress).Result()
 				if err != nil {
 					global.MARKET_LOG.Error(err.Error())
 					return
 				}
-				EthSepoliaPublicKey = append(EthSepoliaPublicKey, w.Address)
+				EthSepoliaPublicKey = append(EthSepoliaPublicKey, w.ContractAddress)
 			case constant.BTC_MAINNET:
-				_, err = global.MARKET_REDIS.RPush(ctx, constant.BTC_PUBLIC_KEY, w.Address).Result()
+				_, err = global.MARKET_REDIS.RPush(ctx, constant.BTC_PUBLIC_KEY, w.ContractAddress).Result()
 				if err != nil {
 					global.MARKET_LOG.Error(err.Error())
 					return
 				}
-				BtcPublicKey = append(BtcPublicKey, w.Address)
+				BtcPublicKey = append(BtcPublicKey, w.ContractAddress)
 			case constant.BTC_TESTNET:
-				_, err = global.MARKET_REDIS.RPush(ctx, constant.BTC_TESTNET_PUBLIC_KEY, w.Address).Result()
+				_, err = global.MARKET_REDIS.RPush(ctx, constant.BTC_TESTNET_PUBLIC_KEY, w.ContractAddress).Result()
 				if err != nil {
 					global.MARKET_LOG.Error(err.Error())
 					return
 				}
-				BtcTestnetPublicKey = append(BtcTestnetPublicKey, w.Address)
+				BtcTestnetPublicKey = append(BtcTestnetPublicKey, w.ContractAddress)
 			case constant.BSC_MAINNET:
-				_, err = global.MARKET_REDIS.RPush(ctx, constant.BSC_PUBLIC_KEY, w.Address).Result()
+				_, err = global.MARKET_REDIS.RPush(ctx, constant.BSC_PUBLIC_KEY, w.ContractAddress).Result()
 				if err != nil {
 					global.MARKET_LOG.Error(err.Error())
 					return
 				}
-				BscPublicKey = append(BscPublicKey, w.Address)
+				BscPublicKey = append(BscPublicKey, w.ContractAddress)
 			case constant.BSC_TESTNET:
-				_, err = global.MARKET_REDIS.RPush(ctx, constant.BSC_TESTNET_PUBLIC_KEY, w.Address).Result()
+				_, err = global.MARKET_REDIS.RPush(ctx, constant.BSC_TESTNET_PUBLIC_KEY, w.ContractAddress).Result()
 				if err != nil {
 					global.MARKET_LOG.Error(err.Error())
 					return
 				}
-				BscTestnetPublicKey = append(BscTestnetPublicKey, w.Address)
+				BscTestnetPublicKey = append(BscTestnetPublicKey, w.ContractAddress)
 			case constant.ARBITRUM_ONE:
-				_, err = global.MARKET_REDIS.RPush(ctx, constant.ARBITRUM_ONE_PUBLIC_KEY, w.Address).Result()
+				_, err = global.MARKET_REDIS.RPush(ctx, constant.ARBITRUM_ONE_PUBLIC_KEY, w.ContractAddress).Result()
 				if err != nil {
 					global.MARKET_LOG.Error(err.Error())
 					return
 				}
-				ArbitrumOnePublicKey = append(ArbitrumOnePublicKey, w.Address)
+				ArbitrumOnePublicKey = append(ArbitrumOnePublicKey, w.ContractAddress)
 			case constant.ARBITRUM_NOVA:
-				_, err = global.MARKET_REDIS.RPush(ctx, constant.ARBITRUM_NOVA_PUBLIC_KEY, w.Address).Result()
+				_, err = global.MARKET_REDIS.RPush(ctx, constant.ARBITRUM_NOVA_PUBLIC_KEY, w.ContractAddress).Result()
 				if err != nil {
 					global.MARKET_LOG.Error(err.Error())
 					return
 				}
-				ArbitrumNovaPublicKey = append(ArbitrumNovaPublicKey, w.Address)
+				ArbitrumNovaPublicKey = append(ArbitrumNovaPublicKey, w.ContractAddress)
 			case constant.ARBITRUM_GOERLI:
-				_, err = global.MARKET_REDIS.RPush(ctx, constant.ARBITRUM_GOERLI_PUBLIC_KEY, w.Address).Result()
+				_, err = global.MARKET_REDIS.RPush(ctx, constant.ARBITRUM_GOERLI_PUBLIC_KEY, w.ContractAddress).Result()
 				if err != nil {
 					global.MARKET_LOG.Error(err.Error())
 					return
 				}
-				ArbitrumGoerliPublicKey = append(ArbitrumGoerliPublicKey, w.Address)
+				ArbitrumGoerliPublicKey = append(ArbitrumGoerliPublicKey, w.ContractAddress)
 			case constant.ARBITRUM_SEPOLIA:
-				_, err = global.MARKET_REDIS.RPush(ctx, constant.ARBITRUM_SEPOLIA_PUBLIC_KEY, w.Address).Result()
+				_, err = global.MARKET_REDIS.RPush(ctx, constant.ARBITRUM_SEPOLIA_PUBLIC_KEY, w.ContractAddress).Result()
 				if err != nil {
 					global.MARKET_LOG.Error(err.Error())
 					return
 				}
-				ArbitrumSepoliaPublicKey = append(ArbitrumSepoliaPublicKey, w.Address)
+				ArbitrumSepoliaPublicKey = append(ArbitrumSepoliaPublicKey, w.ContractAddress)
 			case constant.TRON_MAINNET:
-				_, err = global.MARKET_REDIS.RPush(ctx, constant.TRON_PUBLIC_KEY, w.Address).Result()
+				_, err = global.MARKET_REDIS.RPush(ctx, constant.TRON_PUBLIC_KEY, w.ContractAddress).Result()
 				if err != nil {
 					global.MARKET_LOG.Error(err.Error())
 					return
 				}
-				TronPublicKey = append(TronPublicKey, w.Address)
+				TronPublicKey = append(TronPublicKey, w.ContractAddress)
 			case constant.TRON_NILE:
-				_, err = global.MARKET_REDIS.RPush(ctx, constant.TRON_NILE_PUBLIC_KEY, w.Address).Result()
+				_, err = global.MARKET_REDIS.RPush(ctx, constant.TRON_NILE_PUBLIC_KEY, w.ContractAddress).Result()
 				if err != nil {
 					global.MARKET_LOG.Error(err.Error())
 					return
 				}
-				TronNilePublicKey = append(TronNilePublicKey, w.Address)
+				TronNilePublicKey = append(TronNilePublicKey, w.ContractAddress)
 			case constant.LTC_MAINNET:
-				_, err = global.MARKET_REDIS.RPush(ctx, constant.LTC_PUBLIC_KEY, w.Address).Result()
+				_, err = global.MARKET_REDIS.RPush(ctx, constant.LTC_PUBLIC_KEY, w.ContractAddress).Result()
 				if err != nil {
 					global.MARKET_LOG.Error(err.Error())
 					return
 				}
-				LtcPublicKey = append(LtcPublicKey, w.Address)
+				LtcPublicKey = append(LtcPublicKey, w.ContractAddress)
 			case constant.LTC_TESTNET:
-				_, err = global.MARKET_REDIS.RPush(ctx, constant.LTC_TESTNET_PUBLIC_KEY, w.Address).Result()
+				_, err = global.MARKET_REDIS.RPush(ctx, constant.LTC_TESTNET_PUBLIC_KEY, w.ContractAddress).Result()
 				if err != nil {
 					global.MARKET_LOG.Error(err.Error())
 					return
 				}
-				LtcTestnetPublicKey = append(LtcTestnetPublicKey, w.Address)
+				LtcTestnetPublicKey = append(LtcTestnetPublicKey, w.ContractAddress)
 			case constant.OP_MAINNET:
-				_, err = global.MARKET_REDIS.RPush(ctx, constant.OP_PUBLIC_KEY, w.Address).Result()
+				_, err = global.MARKET_REDIS.RPush(ctx, constant.OP_PUBLIC_KEY, w.ContractAddress).Result()
 				if err != nil {
 					global.MARKET_LOG.Error(err.Error())
 					return
 				}
-				OpPublicKey = append(OpPublicKey, w.Address)
+				OpPublicKey = append(OpPublicKey, w.ContractAddress)
 			case constant.OP_SEPOLIA:
-				_, err = global.MARKET_REDIS.RPush(ctx, constant.OP_SEPOLIA_PUBLIC_KEY, w.Address).Result()
+				_, err = global.MARKET_REDIS.RPush(ctx, constant.OP_SEPOLIA_PUBLIC_KEY, w.ContractAddress).Result()
 				if err != nil {
 					global.MARKET_LOG.Error(err.Error())
 					return
 				}
-				OpSepoliaPublicKey = append(OpSepoliaPublicKey, w.Address)
+				OpSepoliaPublicKey = append(OpSepoliaPublicKey, w.ContractAddress)
 			}
 		}
 	}

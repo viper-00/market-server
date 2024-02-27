@@ -9,6 +9,7 @@ import (
 	"market/model"
 	"market/model/market/request"
 	"market/model/market/response"
+	"market/sweep/setup"
 	"market/utils"
 	"market/utils/jwt"
 	"market/utils/mail"
@@ -151,7 +152,7 @@ func (n *MService) UserLogin(info request.UserLogin) (user response.User, err er
 		}
 
 		jwtString, jwtErr := jwt.CreateJWT(map[string]interface{}{
-			"chain_id":        info.ChainId,
+			"chain_id":        modelUser.ChainId,
 			"email":           modelUser.Email,
 			"address":         modelUser.Address,
 			"contractAddress": modelUser.ContractAddress,
@@ -242,7 +243,7 @@ func (m *MService) InitializeAccount(chainId int, email string) (err error) {
 		return
 	}
 
-	return nil
+	return setup.SavePublicKeyToRedis(context.Background(), chainId, contractAddress)
 }
 
 // value, _ := c.Get("chainId")
@@ -270,4 +271,25 @@ func (m *MService) UpdateUserNotificationSetting(c *gin.Context, req request.Upd
 
 func (m *MService) CreateUserAffiliate(c *gin.Context, req request.CreateUserAffiliate) (result interface{}, err error) {
 	return
+}
+
+func (m *MService) GetUserNotification(c *gin.Context) (result interface{}, err error) {
+	var nts []model.Notification
+	chainId, _ := c.Get("chainId")
+	contractAddress, _ := c.Get("contractAddress")
+
+	var user model.User
+	err = global.MARKET_DB.Where("chain_id = ? AND contract_address = ? AND status = 1", chainId, contractAddress).First(&user).Error
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return
+	}
+
+	err = global.MARKET_DB.Where("chain_id = ? AND user_id = ? AND is_read = ?", chainId, user.ID, constant.UNREAD).Order("id desc").Find(&nts).Error
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return
+	}
+
+	return nts, nil
 }

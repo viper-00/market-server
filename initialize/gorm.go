@@ -30,6 +30,9 @@ func RegisterTables() {
 		model.EventComment{},
 		model.EventCommentLike{},
 		model.EventPlay{},
+		model.Transaction{},
+		model.OwnTransaction{},
+		model.Notification{},
 	); err != nil {
 		global.MARKET_LOG.Error("db: register table failed", zap.Error(err))
 		os.Exit(0)

@@ -42,6 +42,12 @@ func handleNotification(request request.NotificationRequest) (err error) {
 		return
 	}
 
+	err = service.MarketService.SaveNotification(request, ownId)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return
+	}
+
 	_, err = global.MARKET_REDIS.RPush(context.Background(), constant.WS_NOTIFICATION, ownId).Result()
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())

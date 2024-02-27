@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"market/global"
 	"market/global/constant"
 	"market/model"
@@ -55,6 +56,42 @@ func (n *MService) HasTxByChainIdAndHash(chainId int, hash string) (hasWallet bo
 	}
 
 	return false, nil
+}
+
+func (n *MService) SaveNotification(request request.NotificationRequest, ownId uint) (err error) {
+	var noModel model.Notification
+	noModel.Hash = request.Hash
+	noModel.ChainId = request.Chain
+
+	var uModel model.User
+	err = global.MARKET_DB.Where("contract_address = ? AND status = 1", request.Address).First(&uModel).Error
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return
+	}
+	noModel.UserId = uModel.ID
+	noModel.OwnId = ownId
+	noModel.IsRead = int(constant.UNREAD)
+	if request.TransactType == "send" {
+		noModel.Title = fmt.Sprintf("Successfully sent %s", request.Token)
+		noModel.Description = fmt.Sprintf("Successfully sent %s", request.Token)
+		noModel.Content = fmt.Sprintf("%s %s %s received", request.Address, request.Amount, request.Token)
+		noModel.NotificationType = string(constant.OUTGOING)
+	} else if request.TransactType == "receive" {
+		noModel.Title = fmt.Sprintf("Successfully received %s", request.Token)
+		noModel.Description = fmt.Sprintf("Successfully received %s", request.Token)
+		noModel.Content = fmt.Sprintf("%s %s %s sent", request.Address, request.Amount, request.Token)
+		noModel.NotificationType = string(constant.INCOMING)
+	} else {
+		return errors.New("not support")
+	}
+
+	err = global.MARKET_DB.Save(&noModel).Error
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return
+	}
+	return nil
 }
 
 func (n *MService) SaveOwnTx(request request.NotificationRequest) (id uint, err error) {

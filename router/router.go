@@ -48,6 +48,7 @@ func (mRouter *MainRouter) InitRouter(Router *gin.RouterGroup) {
 		userRouter.PUT("user-setting", api.UpdateUserSetting)
 		userRouter.PUT("user-notification-setting", api.UpdateUserNotificationSetting)
 		userRouter.POST("user-affiliate", api.CreateUserAffiliate)
+		userRouter.GET("user-notification", api.GetUserNotification)
 	}
 
 	eventRouter := clientRouter.Group("/event")
