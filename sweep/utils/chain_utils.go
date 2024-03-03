@@ -88,3 +88,17 @@ func GetContractInfoByChainIdAndSymbol(chainId int, symbol string) (bool, string
 	}
 	return false, "", "", 0
 }
+
+func GetOneChainInfoByChainId(chainId int) (chain model.ChainInfo) {
+	if !IsChainJoinSweep(chainId) {
+		return chain
+	}
+
+	for _, element := range model.ChainList {
+		if element.ChainId == chainId {
+			return element
+		}
+	}
+
+	return chain
+}

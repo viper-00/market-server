@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"market/global"
 	"market/global/constant"
-	"market/sweep/utils"
+	"market/model/market/response"
+	sweepUtils "market/sweep/utils"
+	"market/utils"
 	"math/big"
 	"time"
 
@@ -47,7 +49,7 @@ func GenerateEthereumCollectionContract(chainId int, ownerPublicKey string) (con
 		return "", errors.New("chain not support")
 	}
 
-	isSupport, _, contractAddress, _ = utils.GetContractInfoByChainIdAndSymbol(chainId, constant.PREDICTMARKET)
+	isSupport, _, contractAddress, _ = sweepUtils.GetContractInfoByChainIdAndSymbol(chainId, constant.PREDICTMARKET)
 	if !isSupport {
 		return "", errors.New("contract address not found")
 	}
@@ -154,4 +156,55 @@ func MonitorTxStatus(chainId int, hash string) (err error) {
 	} else {
 		return errors.New("transaction failed")
 	}
+}
+
+func GetSingleTokenBalance(chainId, decimals int, contractAddress, address string) (balance string, err error) {
+	rpc := constant.GetRPCUrlByNetwork(chainId)
+	if rpc == "" {
+		return "", errors.New("chain not support")
+	}
+
+	intBalance, err := CallTokenBalanceOf(rpc, address, contractAddress)
+	if err != nil {
+		return "", err
+	}
+
+	balance = utils.CalculateBalance(intBalance, decimals)
+
+	return
+}
+
+func GetAllTokenBalance(chainId int, address string) (balance response.UserBalance, err error) {
+	rpc := constant.GetRPCUrlByNetwork(chainId)
+	if rpc == "" {
+		return balance, errors.New("chain not support")
+	}
+
+	// eth, usdt, usdc
+	ethBalance, err := GetEthBalanceByAddress(rpc, address)
+	if err != nil {
+		return
+	}
+
+	chainInfo := sweepUtils.GetOneChainInfoByChainId(chainId)
+
+	for _, v := range chainInfo.Coins {
+		if v.Symbol == constant.ETH {
+			balance.ETH = utils.CalculateBalance(ethBalance, v.Decimals)
+		} else if v.Symbol == constant.USDT {
+			usdtBalance, usdtErr := CallTokenBalanceOf(rpc, address, v.Contract)
+			if usdtErr != nil {
+				return balance, usdtErr
+			}
+			balance.USDT = utils.CalculateBalance(usdtBalance, v.Decimals)
+		} else if v.Symbol == constant.USDC {
+			usdcBalance, usdcErr := CallTokenBalanceOf(rpc, address, v.Contract)
+			if usdcErr != nil {
+				return balance, usdcErr
+			}
+			balance.USDC = utils.CalculateBalance(usdcBalance, v.Decimals)
+		}
+	}
+
+	return balance, nil
 }

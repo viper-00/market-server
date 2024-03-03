@@ -156,6 +156,7 @@ var (
 var (
 	WS_NOTIFICATION    = "WS_NOTIFICATION"
 	DAILY_REPORT_ERROR = "DAILY_REPORT_ERROR"
+	CRYPTO_PRICE       = "CRYPTO_PRICE"
 )
 
 var AllPendingBlock = []string{
@@ -213,4 +214,21 @@ var (
 	DELETE ReadStatus = 0
 	UNREAD ReadStatus = 1
 	READ   ReadStatus = 2
+)
+
+type CoinIds string
+
+var (
+	IDS_Ethereum CoinIds = "ethereum"
+	IDS_USDT     CoinIds = "tether"
+	IDS_USDC     CoinIds = "usd-coin"
+)
+
+type EventType string
+
+var (
+	EVENT_CRYPTO   EventType = "Crypto"
+	EVENT_BUSINESS EventType = "Business"
+	EVENT_SCIENCE  EventType = "Science"
+	EVENT_GAME     EventType = "Game"
 )

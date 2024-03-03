@@ -38,6 +38,7 @@ func (mRouter *MainRouter) InitRouter(Router *gin.RouterGroup) {
 		clientRouter.POST("register", api.Register)
 		clientRouter.GET("verify-invitation", api.VerifyInvitation)
 		clientRouter.POST("login", api.Login)
+		clientRouter.GET("crypto-price", api.GetCryptoPrice)
 	}
 
 	userRouter := clientRouter.Group("/user")
@@ -49,6 +50,7 @@ func (mRouter *MainRouter) InitRouter(Router *gin.RouterGroup) {
 		userRouter.PUT("user-notification-setting", api.UpdateUserNotificationSetting)
 		userRouter.POST("user-affiliate", api.CreateUserAffiliate)
 		userRouter.GET("user-notification", api.GetUserNotification)
+		userRouter.GET("user-balance", api.GetUserBalance)
 	}
 
 	eventRouter := clientRouter.Group("/event")

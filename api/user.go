@@ -207,3 +207,18 @@ func (n *MarketApi) GetUserNotification(c *gin.Context) {
 	res = common.OKWithData(result)
 	c.JSON(http.StatusOK, res)
 }
+
+func (n *MarketApi) GetUserBalance(c *gin.Context) {
+	var res common.Response
+
+	result, err := service.MarketService.GetUserBalance(c)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		res = common.FailWithMessage(err.Error())
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
+	res = common.OKWithData(result)
+	c.JSON(http.StatusOK, res)
+}

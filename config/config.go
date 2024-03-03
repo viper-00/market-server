@@ -18,6 +18,11 @@ type Server struct {
 	Smtp             Smtp             `mapstructure:"smtp" json:"smtp" yaml:"smtp"`
 	Client           Client           `mapstructure:"client" json:"client" yaml:"client"`
 	GeneralAccount   GeneralAccount   `mapstructure:"general-account" json:"general-account" yaml:"general-account"`
+	Coingecko        Coingecko        `mapstructure:"coingecko" json:"coingecko" yaml:"coingecko"`
+}
+
+type Coingecko struct {
+	ApiKey string `mapstructure:"api-key" json:"api-key" yaml:"api-key"`
 }
 
 type GeneralAccount struct {

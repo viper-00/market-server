@@ -252,10 +252,11 @@ func CallTokenTotalSupply(rpc, tokenAddress string) (result interface{}, err err
 	return
 }
 
-func CallTokenBalanceOf(rpc, fromPub, tokenAddress string) (result interface{}, err error) {
-	result, err = CallContractCore(rpc, tokenAddress, BalanceOf, common.HexToAddress(fromPub))
+func CallTokenBalanceOf(rpc, fromPub, tokenAddress string) (balance *big.Int, err error) {
+	result, err := CallContractCore(rpc, tokenAddress, BalanceOf, common.HexToAddress(fromPub))
 	if err != nil {
 		return nil, err
 	}
-	return
+
+	return result["balance"].(*big.Int), nil
 }

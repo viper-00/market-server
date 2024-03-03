@@ -9,15 +9,19 @@ var (
 )
 
 func RunTask() {
-	go func() {
-		RunApiKeyTestTask()
-	}()
+	// go func() {
+	//	RunApiKeyTestTask()
+	// }()
+
+	// go func() {
+	// 	RunDailyReportTask()
+	// }()
+
+	// go func() {
+	// 	RunPendingTxTask()
+	// }()
 
 	go func() {
-		RunDailyReportTask()
-	}()
-
-	go func() {
-		RunPendingTxTask()
+		RunCoingeckoTask()
 	}()
 }

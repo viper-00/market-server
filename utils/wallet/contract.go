@@ -76,14 +76,14 @@ func CallWalletTransactionCore(rpc, fromPrivateKey, fromPublicKey, toPublicKey s
 	return signedTx.Hash().Hex(), nil
 }
 
-func CallContractCore(rpc, contractAddress, contractFunc string, args ...interface{}) (interface{}, error) {
+func CallContractCore(rpc, contractAddress, contractFunc string, args ...interface{}) (map[string]interface{}, error) {
 	client, err := ethclient.Dial(rpc)
 	if err != nil {
 		return nil, err
 	}
 	defer client.Close()
 
-	file, err := os.Open("./erc20.json")
+	file, err := os.Open("json/ERC20.json")
 	if err != nil {
 		return nil, err
 	}
@@ -111,12 +111,29 @@ func CallContractCore(rpc, contractAddress, contractFunc string, args ...interfa
 		return nil, err
 	}
 
-	unPackResult, err := contractABI.Unpack(contractFunc, callResult)
+	inputsMap := make(map[string]interface{})
+
+	err = contractABI.UnpackIntoMap(inputsMap, contractFunc, callResult)
 	if err != nil {
 		return nil, err
 	}
 
-	return unPackResult, nil
+	return inputsMap, nil
+}
+
+func GetEthBalanceByAddress(rpc, address string) (balance *big.Int, err error) {
+	client, err := ethclient.Dial(rpc)
+	if err != nil {
+		return
+	}
+	defer client.Close()
+
+	balance, err = client.BalanceAt(context.Background(), common.HexToAddress(address), nil)
+	if err != nil {
+		return
+	}
+
+	return balance, nil
 }
 
 func GetTransactionByHash(rpc, hash string) (tx *types.Receipt, err error) {

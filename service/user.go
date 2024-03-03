@@ -160,7 +160,7 @@ func (n *MService) UserLogin(info request.UserLogin) (user response.User, err er
 		})
 
 		if jwtErr != nil {
-			global.MARKET_LOG.Error(err.Error())
+			global.MARKET_LOG.Error(jwtErr.Error())
 			return
 		}
 
@@ -175,7 +175,7 @@ func (n *MService) UserLogin(info request.UserLogin) (user response.User, err er
 		user.Bio = modelUserSetting.Bio
 		user.JoinedDate = modelUser.CreatedAt.Unix()
 
-		if _, err = global.MARKET_REDIS.Set(context.Background(), user.Auth, info.Email, time.Minute*20).Result(); err != nil {
+		if _, err = global.MARKET_REDIS.Set(context.Background(), user.Auth, info.Email, time.Hour*24).Result(); err != nil {
 			global.MARKET_LOG.Error(err.Error())
 			return
 		}
@@ -292,4 +292,19 @@ func (m *MService) GetUserNotification(c *gin.Context) (result interface{}, err 
 	}
 
 	return nts, nil
+}
+
+func (m *MService) GetUserBalance(c *gin.Context) (result interface{}, err error) {
+	chainId, _ := c.Get("chainId")
+	contractAddress, _ := c.Get("contractAddress")
+
+	intChainId := int(chainId.(float64))
+
+	result, err = wallet.GetAllTokenBalance(intChainId, contractAddress.(string))
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return
+	}
+
+	return result, nil
 }

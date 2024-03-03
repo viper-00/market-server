@@ -17,3 +17,9 @@ type User struct {
 	Bio             string `json:"bio" gorm:"comment:bio"`
 	JoinedDate      int64  `json:"joined_date" gorm:"comment:joined_date"`
 }
+
+type UserBalance struct {
+	ETH  string `json:"eth"`
+	USDT string `json:"usdt"`
+	USDC string `json:"usdc"`
+}
