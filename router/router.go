@@ -60,6 +60,8 @@ func (mRouter *MainRouter) InitRouter(Router *gin.RouterGroup) {
 		eventRouter.PUT("market-event", api.UpdateMarketEvent)
 		eventRouter.POST("market-event-play", api.CreateMarketEventPlay)
 		eventRouter.PUT("market-event-play", api.UpdateMarketEventPlay)
+		eventRouter.GET("market-event-play", api.GetMarketEventPlay)
+		eventRouter.GET("market-event-type", api.GetMarketEventType)
 	}
 
 	commentRouter := eventRouter.Group("/comment")
