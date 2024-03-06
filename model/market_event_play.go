@@ -6,7 +6,7 @@ type EventPlay struct {
 	common.MARKET_MODEL
 	UserId             uint    `json:"user_id" gorm:"comment:user_id"`
 	Title              string  `json:"title" gorm:"comment:title"`
-	Introduce          string  `json:"introduce" gorm:"comment:introduce"`
+	Introduce          string  `json:"introduce" gorm:"type:text;comment:introduce"`
 	GuessNumber        int     `json:"guess_number" gorm:"comment:guess_number"`
 	MinimumCapitalPool float64 `json:"minimum_capital_pool" gorm:"comment:minimum_capital_pool"`
 	MaximumCapitalPool float64 `json:"maximum_capital_pool" gorm:"comment:maximum_capital_pool"`

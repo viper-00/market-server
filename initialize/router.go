@@ -16,14 +16,17 @@ func Routers() *gin.Engine {
 	SetGinMode(global.MARKET_CONFIG.System.Env)
 
 	newRouter := gin.New()
+
 	newRouter.Use(middleware.Cors())
 
-	newRouter.MaxMultipartMemory = 1 << 20
-
 	// newRouter.GET(global.MARKET_CONFIG.System.RouterPrefix+"/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	// global.MARKET_LOG.Info("register swagger handler")
 
 	MainRouter := new(router.MainRouter)
+
+	newRouter.StaticFS("images", http.Dir("resource/images"))
+	newRouter.StaticFS("files", http.Dir("resource/files"))
+
+	newRouter.MaxMultipartMemory = 1 << 20
 
 	Group := newRouter.Group(global.MARKET_CONFIG.System.RouterPrefix)
 	{

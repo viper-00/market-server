@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"math/rand"
 	"time"
 )
@@ -19,4 +21,10 @@ func StringWithCharset(length int, charset []rune) string {
 		b[i] = charset[rand.Intn(len(charset))]
 	}
 	return string(b)
+}
+
+func EncryptoThroughMd5(str []byte) string {
+	hash := md5.Sum(str)
+	hexString := hex.EncodeToString(hash[:])
+	return hexString
 }

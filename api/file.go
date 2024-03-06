@@ -29,7 +29,6 @@ func (n *MarketApi) UploadFile(c *gin.Context) {
 	extension := fileElement[len(fileElement)-1]
 
 	if extension == "" {
-		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage("File extension not found")
 		c.JSON(http.StatusOK, res)
 		return
@@ -50,8 +49,8 @@ func (n *MarketApi) UploadFile(c *gin.Context) {
 		return
 	}
 
-	res = common.OkWithDetailed(common.Success_Created, "Upload file successful", gin.H{
-		"file_url": global.MARKET_CONFIG.System.FileUrl + saveName,
+	res = common.OKWithData(gin.H{
+		"file_url": global.MARKET_CONFIG.File.ImageUrl + saveName,
 	})
 
 	c.JSON(http.StatusOK, res)

@@ -11,12 +11,12 @@ type Event struct {
 	UniqueWebsiteLink string    `json:"unique_website_link" gorm:"comment:unique_website_link"`
 	ExpireTime        time.Time `json:"expire_time" gorm:"comment:expire_time"`
 	Type              string    `json:"type" gorm:"comment:type"`
+	PlayId            uint      `json:"play_id" gorm:"comment:play_id"`
 	EventLogo         string    `json:"event_logo" gorm:"comment:event_logo"`
 	SettlementAddress string    `json:"settlement_address" gorm:"comment:settlement_address"`
-	CapitalPool       float64   `json:"capital_pool" gorm:"comment:capital_pool"`
 	ResolverAddress   string    `json:"rosolver_address" gorm:"comment:rosolver_address"`
-	RuleDetails       string    `json:"rule_details" gorm:"comment:rule_details"`
 	EventStatus       int       `json:"event_status" gorm:"comment:event_status"`
+	Password          string    `json:"password" gorm:"comment:password"`
 }
 
 func (Event) TableName() string {

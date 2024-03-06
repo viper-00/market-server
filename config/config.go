@@ -19,6 +19,7 @@ type Server struct {
 	Client           Client           `mapstructure:"client" json:"client" yaml:"client"`
 	GeneralAccount   GeneralAccount   `mapstructure:"general-account" json:"general-account" yaml:"general-account"`
 	Coingecko        Coingecko        `mapstructure:"coingecko" json:"coingecko" yaml:"coingecko"`
+	File             File             `mapstructure:"file" json:"file" yaml:"file"`
 }
 
 type Coingecko struct {
@@ -86,7 +87,15 @@ type System struct {
 	UseRedis     bool   `mapstructure:"use-redis" json:"use-redis" yaml:"use-redis"`
 	UseInit      bool   `mapstructure:"use-init" json:"use-init" yaml:"use-init"`
 	UseTask      bool   `mapstructure:"use-task" json:"use-task" yaml:"use-task"`
-	FileUrl      string `mapstructure:"file-url" json:"file-url" yaml:"file-url"`
+}
+
+type File struct {
+	ImageUrl        string `mapstructure:"image-url" json:"image-url" yaml:"image-url"`
+	ImageClientPath string `mapstructure:"image-client-path" json:"image-client-path" yaml:"image-client-path"`
+	ImageServerPath string `mapstructure:"image-server-path" json:"image-server-path" yaml:"image-server-path"`
+	FileUrl         string `mapstructure:"file-url" json:"file-url" yaml:"file-url"`
+	FileClientPath  string `mapstructure:"file-client-path" json:"file-client-path" yaml:"file-client-path"`
+	FileServerPath  string `mapstructure:"file-server-path" json:"file-server-path" yaml:"file-server-path"`
 }
 
 type Redis struct {

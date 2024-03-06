@@ -20,6 +20,6 @@
 
 *.iml
 
-# config
-
 config.yaml
+resource/images/
+resource/files/

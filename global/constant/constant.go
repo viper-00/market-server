@@ -232,3 +232,11 @@ var (
 	EVENT_SCIENCE  EventType = "Science"
 	EVENT_GAME     EventType = "Game"
 )
+
+type EventPlayType string
+
+var (
+	EVENT_PLAY_ONE   EventPlayType = "One"
+	EVENT_PLAY_TWO   EventPlayType = "Two"
+	EVENT_PLAY_THREE EventPlayType = "Three"
+)
