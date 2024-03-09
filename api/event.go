@@ -10,6 +10,30 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func (n *MarketApi) GetMarketEvent(c *gin.Context) {
+	var res common.Response
+	var event request.GetMarketEvent
+
+	err := c.ShouldBind(&event)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		res = common.FailWithMessage(err.Error())
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
+	result, err := service.MarketService.GetMarketEvent(c, event)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		res = common.FailWithMessage(err.Error())
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
+	res = common.OKWithData(result)
+	c.JSON(http.StatusOK, res)
+}
+
 func (n *MarketApi) CreateMarketEvent(c *gin.Context) {
 	var res common.Response
 	var event request.CreateMarketEvent
@@ -22,7 +46,7 @@ func (n *MarketApi) CreateMarketEvent(c *gin.Context) {
 		return
 	}
 
-	err = service.MarketService.CreateMarketEvent(c, event)
+	result, err := service.MarketService.CreateMarketEvent(c, event)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage(err.Error())
@@ -30,7 +54,7 @@ func (n *MarketApi) CreateMarketEvent(c *gin.Context) {
 		return
 	}
 
-	res = common.OKWithData(nil)
+	res = common.OKWithData(result)
 	c.JSON(http.StatusOK, res)
 }
 

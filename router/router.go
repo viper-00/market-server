@@ -56,6 +56,7 @@ func (mRouter *MainRouter) InitRouter(Router *gin.RouterGroup) {
 	eventRouter := clientRouter.Group("/event")
 	eventRouter.Use(middleware.ClientAuth())
 	{
+		eventRouter.GET("market-event", api.GetMarketEvent)
 		eventRouter.POST("market-event", api.CreateMarketEvent)
 		eventRouter.PUT("market-event", api.UpdateMarketEvent)
 		eventRouter.POST("market-event-play", api.CreateMarketEventPlay)

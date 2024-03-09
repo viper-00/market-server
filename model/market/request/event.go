@@ -1,5 +1,9 @@
 package request
 
+type GetMarketEvent struct {
+	Code string `json:"code" form:"code" binding:"required"`
+}
+
 type CreateMarketEvent struct {
 	Title             string `json:"title" form:"title" binding:"required"`
 	ExpireTime        int64  `json:"expire_time" form:"expire_time" binding:"required"`

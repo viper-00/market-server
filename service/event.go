@@ -11,10 +11,39 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (m *MService) CreateMarketEvent(c *gin.Context, req request.CreateMarketEvent) (err error) {
+func (m *MService) GetMarketEvent(c *gin.Context, req request.GetMarketEvent) (result interface{}, err error) {
+	var eventModel model.Event
+	err = global.MARKET_DB.Where("unique_website_code = ? AND event_status = 1 AND status = 1", req.Code).First(&eventModel).Error
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return
+	}
+
+	var eventPlay model.EventPlay
+	err = global.MARKET_DB.Where("id = ? AND status = 1", eventModel.PlayId).First(&eventPlay).Error
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return
+	}
+
+	var eventComments []model.EventComment
+	err = global.MARKET_DB.Where("event_id = ? AND status = 1", eventModel.ID).Find(&eventComments).Error
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return
+	}
+
+	return map[string]interface{}{
+		"event":   eventModel,
+		"play":    eventPlay,
+		"comment": eventComments,
+	}, nil
+}
+
+func (m *MService) CreateMarketEvent(c *gin.Context, req request.CreateMarketEvent) (result interface{}, err error) {
 	var event model.Event
 	event.Title = req.Title
-	event.UniqueWebsiteLink = utils.GenerateStringRandomly("event_", 12)
+	event.UniqueWebsiteCode = utils.GenerateStringRandomly("event_", 12)
 	event.ExpireTime = time.Unix(req.ExpireTime/1000, (req.ExpireTime%1000)*int64(time.Millisecond))
 	event.Type = req.Type
 
@@ -34,8 +63,14 @@ func (m *MService) CreateMarketEvent(c *gin.Context, req request.CreateMarketEve
 	event.Status = 1
 
 	err = global.MARKET_DB.Save(&event).Error
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return
+	}
 
-	return
+	return map[string]interface{}{
+		"unique_code": event.UniqueWebsiteCode,
+	}, nil
 }
 
 func (m *MService) UpdateMarketEvent(c *gin.Context, req request.UpdateMarketEvent) (result interface{}, err error) {
