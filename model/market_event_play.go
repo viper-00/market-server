@@ -11,6 +11,7 @@ type EventPlay struct {
 	MinimumCapitalPool float64 `json:"minimum_capital_pool" gorm:"comment:minimum_capital_pool"`
 	MaximumCapitalPool float64 `json:"maximum_capital_pool" gorm:"comment:maximum_capital_pool"`
 	Coin               string  `json:"coin" gorm:"comment:coin"` // USDT USDC
+	PledgeAmount       float64 `json:"pledge_amount" gorm:"comment:pledge_amount"`
 }
 
 func (EventPlay) TableName() string {

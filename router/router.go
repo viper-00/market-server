@@ -65,6 +65,12 @@ func (mRouter *MainRouter) InitRouter(Router *gin.RouterGroup) {
 		eventRouter.GET("market-event-type", api.GetMarketEventType)
 	}
 
+	orderRouter := eventRouter.Group("/order")
+	orderRouter.Use(middleware.ClientAuth())
+	{
+		orderRouter.POST("market-event-order", api.CreateMarketEventOrder)
+	}
+
 	commentRouter := eventRouter.Group("/comment")
 	commentRouter.Use(middleware.ClientAuth())
 	{

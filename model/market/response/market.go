@@ -35,3 +35,26 @@ type OwnListResponse struct {
 	Page         int                    `json:"page"`
 	PageSize     int                    `json:"pageSize"`
 }
+
+type EventPlayResponse struct {
+	Title              string                   `json:"title"`
+	Introduce          string                   `json:"introduce"`
+	GuessNumber        int                      `json:"guess_number"`
+	MinimumCapitalPool float64                  `json:"minimum_capital_pool"`
+	MaximumCapitalPool float64                  `json:"maximum_capital_pool"`
+	Coin               string                   `json:"coin"`
+	PledgeAmount       float64                  `json:"pledge_amount"`
+	Values             []EventPlayValueResponse `json:"values"`
+}
+
+type EventPlayValueResponse struct {
+	Value  string               `json:"value"`
+	Orders []EventOrderResponse `json:"orders"`
+}
+
+type EventOrderResponse struct {
+	Amount              float64 `json:"amount"`
+	OrderType           string  `json:"order_type"`
+	UserContractAddress string  `json:"user_address"`
+	Username            string  `json:"username"`
+}

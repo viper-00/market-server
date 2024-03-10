@@ -253,7 +253,16 @@ func (m *MService) InitializeAccount(chainId int, email string) (err error) {
 // c.Set("contractAddress", contractAddress)
 // c.Set("time", time)
 
-func (m *MService) GetUserInfo(c *gin.Context) (result interface{}, err error) {
+func (m *MService) GetUserInfo(c *gin.Context) (model model.User, err error) {
+	chainId, _ := c.Get("chainId")
+	contractAddress, _ := c.Get("contractAddress")
+
+	err = global.MARKET_DB.Where("contract_address = ? AND chain_id = ? AND status = 1", contractAddress, chainId).First(&model).Error
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return
+	}
+
 	return
 }
 
