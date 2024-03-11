@@ -3,6 +3,7 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"math"
 	"math/big"
 	"strconv"
 	"strings"
@@ -36,4 +37,11 @@ func HexStringToInt64(hexString string) (int64, error) {
 		return 0, err
 	}
 	return intValue, nil
+}
+
+func FormatToOriginalValue(value float64, decimals int) int64 {
+
+	formattedBalance := value * math.Pow10(decimals)
+
+	return int64(formattedBalance)
 }

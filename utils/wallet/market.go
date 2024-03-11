@@ -208,3 +208,33 @@ func GetAllTokenBalance(chainId int, address string) (balance response.UserBalan
 
 	return balance, nil
 }
+
+func TransferAssetToReceiveAddress(chainId int, callContractAddress string, sendVal float64) (hash string, err error) {
+	rpc := constant.GetRPCUrlByNetwork(chainId)
+	if rpc == "" {
+		return "", errors.New("chain not support")
+	}
+
+	isSupport, _, contractAddress, decimals := sweepUtils.GetContractInfoByChainIdAndSymbol(chainId, constant.USDT)
+	if !isSupport {
+		return "", errors.New("contract address not found")
+	}
+
+	tokenAddresses := []string{contractAddress}
+	sendToAddresses := []string{global.MARKET_CONFIG.GeneralAccount.Op.ReceiveAccount}
+	sendValues := []big.Int{*big.NewInt(utils.FormatToOriginalValue(sendVal, decimals))}
+
+	var gasLimit uint64 = 100000
+
+	hash, err = CallWithdrawByCollectionContract(rpc, global.MARKET_CONFIG.GeneralAccount.Op.PrivateKey, global.MARKET_CONFIG.GeneralAccount.Op.PublicKey, callContractAddress, tokenAddresses, sendToAddresses, sendValues, gasLimit)
+	if err != nil {
+		return "", err
+	}
+
+	err = MonitorTxStatus(chainId, hash)
+	if err != nil {
+		return "", err
+	}
+
+	return hash, nil
+}

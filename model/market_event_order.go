@@ -10,6 +10,7 @@ type EventOrder struct {
 	PlayValue   string  `json:"play_value" gorm:"play_value"`
 	OrderStatus uint    `json:"order_status" gorm:"order_status"` // 1:process 2:settlement 3:complete 4:failed
 	OrderType   uint    `json:"order_type" gorm:"order_type"`     // 1: buy 2: sell
+	Hash        string  `json:"hash" gorm:"hash"`
 }
 
 func (EventOrder) TableName() string {

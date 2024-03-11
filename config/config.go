@@ -31,8 +31,9 @@ type GeneralAccount struct {
 }
 
 type Op struct {
-	PrivateKey string `mapstructure:"private-key" json:"private-key" yaml:"private-key"`
-	PublicKey  string `mapstructure:"public-key" json:"public-key" yaml:"public-key"`
+	PrivateKey     string `mapstructure:"private-key" json:"private-key" yaml:"private-key"`
+	PublicKey      string `mapstructure:"public-key" json:"public-key" yaml:"public-key"`
+	ReceiveAccount string `mapstructure:"receive-account" json:"receive-account" yaml:"receive-account"`
 }
 
 type Client struct {
