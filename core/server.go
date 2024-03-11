@@ -49,7 +49,6 @@ func RunWindowsServer() {
 	global.MARKET_LOG.Error(server.ListenAndServe().Error())
 }
 
-// Hot reload for gin server
 func initServer(address string, router *gin.Engine) Server {
 	server := endless.NewServer(address, router)
 	server.ReadHeaderTimeout = 20 * time.Second

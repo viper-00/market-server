@@ -21,7 +21,6 @@ func IsChainJoinSweep(chainId int) bool {
 	return false
 }
 
-// isContract, symbol, contractAddress, decimals
 func GetContractInfoByChainIdAndContractAddress(chainId int, contractAddress string) (bool, string, string, int) {
 	if !IsChainJoinSweep(chainId) {
 		return false, "", "", 0
@@ -69,7 +68,6 @@ func GetContractInfoByChainIdAndContractAddress(chainId int, contractAddress str
 	return false, "", "", 0
 }
 
-// isContract, symbol, contractAddress, decimals
 func GetContractInfoByChainIdAndSymbol(chainId int, symbol string) (bool, string, string, int) {
 	if !IsChainJoinSweep(chainId) {
 		return false, "", "", 0

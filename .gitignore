@@ -20,6 +20,8 @@
 
 *.iml
 
+# config
+__debug_bin*
 config.yaml
 resource/images/
 resource/files/

@@ -49,6 +49,7 @@ zap:
   encode-level: LowercaseColorLevelEncoder
   stacktrace-key: stacktrace
   log-in-console: true
+  max-age: 0
 
 redis:
   db: 
@@ -56,6 +57,8 @@ redis:
   password: ""
 
 mysql:
+  prefix:
+  singular: false
   path: 
   port: 
   config: charset=utf8mb4&parseTime=True
@@ -66,6 +69,7 @@ mysql:
   max-open-conns: 100
   log-mode: error
   log-zap: false
+  engine:
 
 smtp:
   host:

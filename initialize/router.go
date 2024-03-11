@@ -21,12 +21,12 @@ func Routers() *gin.Engine {
 
 	// newRouter.GET(global.MARKET_CONFIG.System.RouterPrefix+"/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	MainRouter := new(router.MainRouter)
-
 	newRouter.StaticFS("images", http.Dir("resource/images"))
 	newRouter.StaticFS("files", http.Dir("resource/files"))
 
 	newRouter.MaxMultipartMemory = 1 << 20
+
+	MarketRouter := new(router.MarketRouter)
 
 	Group := newRouter.Group(global.MARKET_CONFIG.System.RouterPrefix)
 	{
@@ -34,7 +34,7 @@ func Routers() *gin.Engine {
 			c.JSON(http.StatusOK, "ok")
 		})
 
-		MainRouter.InitRouter(Group)
+		MarketRouter.InitRouter(Group)
 	}
 
 	global.MARKET_LOG.Info("router register success")

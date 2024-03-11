@@ -8,9 +8,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type MainRouter struct{}
+type MarketRouter struct{}
 
-func (mRouter *MainRouter) InitRouter(Router *gin.RouterGroup) {
+func (mRouter *MarketRouter) InitRouter(Router *gin.RouterGroup) {
 	internalRouter := Router.Group("/internal")
 	api := new(api.MarketApi)
 	{
