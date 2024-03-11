@@ -22,7 +22,7 @@ func (n *MarketApi) CreateCommentLike(c *gin.Context) {
 		return
 	}
 
-	result, err := service.MarketService.CreateCommentLike(c, like)
+	err = service.MarketService.CreateCommentLike(c, like)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage(err.Error())
@@ -30,7 +30,7 @@ func (n *MarketApi) CreateCommentLike(c *gin.Context) {
 		return
 	}
 
-	res = common.OKWithData(result)
+	res = common.OkWithMessage("execution succeed")
 	c.JSON(http.StatusOK, res)
 }
 
@@ -46,7 +46,7 @@ func (n *MarketApi) UpdateCommentLike(c *gin.Context) {
 		return
 	}
 
-	result, err := service.MarketService.UpdateCommentLike(c, like)
+	err = service.MarketService.UpdateCommentLike(c, like)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage(err.Error())
@@ -54,6 +54,6 @@ func (n *MarketApi) UpdateCommentLike(c *gin.Context) {
 		return
 	}
 
-	res = common.OKWithData(result)
+	res = common.OkWithMessage("execution succeed")
 	c.JSON(http.StatusOK, res)
 }

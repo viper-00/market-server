@@ -70,7 +70,7 @@ func (n *MarketApi) UpdateMarketEvent(c *gin.Context) {
 		return
 	}
 
-	result, err := service.MarketService.UpdateMarketEvent(c, event)
+	err = service.MarketService.UpdateMarketEvent(c, event)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage(err.Error())
@@ -78,7 +78,7 @@ func (n *MarketApi) UpdateMarketEvent(c *gin.Context) {
 		return
 	}
 
-	res = common.OKWithData(result)
+	res = common.OkWithMessage("execution succeed")
 	c.JSON(http.StatusOK, res)
 }
 

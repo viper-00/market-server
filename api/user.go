@@ -97,30 +97,6 @@ func (n *MarketApi) GetUserInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
-func (n *MarketApi) UpdateUserInfo(c *gin.Context) {
-	var res common.Response
-	var user request.UpdateUserInfo
-
-	err := c.ShouldBind(&user)
-	if err != nil {
-		global.MARKET_LOG.Error(err.Error())
-		res = common.FailWithMessage(err.Error())
-		c.JSON(http.StatusOK, res)
-		return
-	}
-
-	result, err := service.MarketService.UpdateUserInfo(c, user)
-	if err != nil {
-		global.MARKET_LOG.Error(err.Error())
-		res = common.FailWithMessage(err.Error())
-		c.JSON(http.StatusOK, res)
-		return
-	}
-
-	res = common.OKWithData(result)
-	c.JSON(http.StatusOK, res)
-}
-
 func (n *MarketApi) UpdateUserSetting(c *gin.Context) {
 	var res common.Response
 	var user request.UpdateUserSetting
@@ -133,7 +109,7 @@ func (n *MarketApi) UpdateUserSetting(c *gin.Context) {
 		return
 	}
 
-	result, err := service.MarketService.UpdateUserSetting(c, user)
+	err = service.MarketService.UpdateUserSetting(c, user)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage(err.Error())
@@ -141,7 +117,7 @@ func (n *MarketApi) UpdateUserSetting(c *gin.Context) {
 		return
 	}
 
-	res = common.OKWithData(result)
+	res = common.OkWithMessage("execution succeed")
 	c.JSON(http.StatusOK, res)
 }
 
@@ -157,7 +133,7 @@ func (n *MarketApi) UpdateUserNotificationSetting(c *gin.Context) {
 		return
 	}
 
-	result, err := service.MarketService.UpdateUserNotificationSetting(c, user)
+	err = service.MarketService.UpdateUserNotificationSetting(c, user)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage(err.Error())
@@ -165,7 +141,7 @@ func (n *MarketApi) UpdateUserNotificationSetting(c *gin.Context) {
 		return
 	}
 
-	res = common.OKWithData(result)
+	res = common.OkWithMessage("execution succeed")
 	c.JSON(http.StatusOK, res)
 }
 

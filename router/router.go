@@ -45,7 +45,6 @@ func (mRouter *MainRouter) InitRouter(Router *gin.RouterGroup) {
 	userRouter.Use(middleware.ClientAuth())
 	{
 		userRouter.GET("user-info", api.GetUserInfo)
-		userRouter.PUT("user-info", api.UpdateUserInfo)
 		userRouter.PUT("user-setting", api.UpdateUserSetting)
 		userRouter.PUT("user-notification-setting", api.UpdateUserNotificationSetting)
 		userRouter.POST("user-affiliate", api.CreateUserAffiliate)
@@ -75,7 +74,7 @@ func (mRouter *MainRouter) InitRouter(Router *gin.RouterGroup) {
 	commentRouter.Use(middleware.ClientAuth())
 	{
 		commentRouter.POST("market-event-comment", api.CreateEventComment)
-		commentRouter.GET("market-event-comment", api.FindEventComment)
+		commentRouter.GET("market-event-comment", api.GetEventComment)
 		commentRouter.DELETE("market-event-comment", api.RemoveEventComment)
 	}
 

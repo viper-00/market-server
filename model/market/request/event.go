@@ -15,7 +15,13 @@ type CreateMarketEvent struct {
 	Password          string `json:"password" form:"password" binding:"required"`
 }
 
-type UpdateMarketEvent struct{}
+type UpdateMarketEvent struct {
+	Code      string `json:"code" form:"code" binding:"required"`
+	Title     string `json:"title" form:"title" binding:"required"`
+	Type      string `json:"type" form:"type" binding:"required"`
+	EventLogo string `json:"event_logo" form:"event_logo" binding:"required"`
+	Password  string `json:"password" form:"password" binding:"required"`
+}
 
 type CreateMarketEventPlay struct{}
 

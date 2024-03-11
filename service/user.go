@@ -235,8 +235,14 @@ func (m *MService) InitializeAccount(chainId int, email string) (err error) {
 	// user notification of setting
 	var userNotificationSetting model.UserNotificationSetting
 	userNotificationSetting.UserId = user.ID
-	userNotificationSetting.Email = user.Email
+	userNotificationSetting.EmailUpdate = false
 	userNotificationSetting.MarketUpdate = false
+	userNotificationSetting.DailyUpdate = false
+	userNotificationSetting.IncomingUpdate = false
+	userNotificationSetting.OutgoingUpdate = false
+	userNotificationSetting.EventUpdate = false
+	userNotificationSetting.OrderUpdate = false
+	userNotificationSetting.CryptoPriceUpdate = false
 	err = global.MARKET_DB.Save(&userNotificationSetting).Error
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
@@ -266,16 +272,48 @@ func (m *MService) GetUserInfo(c *gin.Context) (model model.User, err error) {
 	return
 }
 
-func (m *MService) UpdateUserInfo(c *gin.Context, req request.UpdateUserInfo) (result interface{}, err error) {
-	return
+func (m *MService) UpdateUserSetting(c *gin.Context, req request.UpdateUserSetting) (err error) {
+	user, err := m.GetUserInfo(c)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return
+	}
+
+	err = global.MARKET_DB.Model(&model.UserSetting{}).Where("user_id = ?", user.ID).Updates(map[string]interface{}{
+		"username":  req.Username,
+		"avatarUrl": req.AvatarUrl,
+		"bio":       req.Bio,
+	}).Error
+
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return
+	}
+	return nil
 }
 
-func (m *MService) UpdateUserSetting(c *gin.Context, req request.UpdateUserSetting) (result interface{}, err error) {
-	return
-}
+func (m *MService) UpdateUserNotificationSetting(c *gin.Context, req request.UpdateUserNotificationSetting) (err error) {
+	user, err := m.GetUserInfo(c)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return
+	}
 
-func (m *MService) UpdateUserNotificationSetting(c *gin.Context, req request.UpdateUserNotificationSetting) (result interface{}, err error) {
-	return
+	err = global.MARKET_DB.Model(&model.UserNotificationSetting{}).Where("user_id = ?", user.ID).Updates(map[string]interface{}{
+		"email_update":        req.EmailUpdate,
+		"market_update":       req.MarketUpdate,
+		"daily_update":        req.DailyUpdate,
+		"incoming_update":     req.IncomingUpdate,
+		"outgoing_update":     req.OutgoingUpdate,
+		"event_update":        req.EventUpdate,
+		"order_update":        req.OrderUpdate,
+		"crypto_price_update": req.CryptoPriceUpdate,
+	}).Error
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return
+	}
+	return nil
 }
 
 func (m *MService) CreateUserAffiliate(c *gin.Context, req request.CreateUserAffiliate) (result interface{}, err error) {

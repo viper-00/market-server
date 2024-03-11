@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"market/global"
 	"market/global/constant"
 	"market/model"
@@ -140,7 +141,29 @@ func (m *MService) CreateMarketEvent(c *gin.Context, req request.CreateMarketEve
 	}, nil
 }
 
-func (m *MService) UpdateMarketEvent(c *gin.Context, req request.UpdateMarketEvent) (result interface{}, err error) {
+func (m *MService) UpdateMarketEvent(c *gin.Context, req request.UpdateMarketEvent) (err error) {
+	event, err := m.GetMarketEventByUniqueCode(req.Code)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return
+	}
+
+	if event.Password != utils.EncryptoThroughMd5([]byte(req.Password)) {
+		err = errors.New("Incorrect password")
+		return
+	}
+
+	err = global.MARKET_DB.Model(&model.Event{}).Where("id = ?", event.ID).Updates(map[string]interface{}{
+		"title":      req.Title,
+		"type":       req.Type,
+		"event_logo": req.EventLogo,
+	}).Error
+
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return
+	}
+
 	return
 }
 

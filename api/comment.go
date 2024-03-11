@@ -34,9 +34,9 @@ func (n *MarketApi) CreateEventComment(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
-func (n *MarketApi) FindEventComment(c *gin.Context) {
+func (n *MarketApi) GetEventComment(c *gin.Context) {
 	var res common.Response
-	var comment request.FindEventComment
+	var comment request.GetEventComment
 
 	err := c.ShouldBind(&comment)
 	if err != nil {
@@ -46,7 +46,7 @@ func (n *MarketApi) FindEventComment(c *gin.Context) {
 		return
 	}
 
-	result, err := service.MarketService.FindEventComment(c, comment)
+	result, err := service.MarketService.GetEventComment(c, comment)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage(err.Error())
@@ -70,7 +70,7 @@ func (n *MarketApi) RemoveEventComment(c *gin.Context) {
 		return
 	}
 
-	result, err := service.MarketService.RemoveEventComment(c, comment)
+	err = service.MarketService.RemoveEventComment(c, comment)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage(err.Error())
@@ -78,6 +78,6 @@ func (n *MarketApi) RemoveEventComment(c *gin.Context) {
 		return
 	}
 
-	res = common.OKWithData(result)
+	res = common.OkWithMessage("execution succeed")
 	c.JSON(http.StatusOK, res)
 }
