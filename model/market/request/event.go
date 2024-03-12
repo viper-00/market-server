@@ -29,7 +29,7 @@ type UpdateMarketEventPlay struct{}
 
 type CreateMarketEventOrder struct {
 	EventUniqueCode string  `json:"event_unique_code" form:"event_unique_code" binding:"required"`
-	Amount          float64 `json:"amount" form:"amount" binding:"required"`
+	Amount          float64 `json:"amount" form:"amount"`
 	PlayValue       string  `json:"play_value" form:"play_value" binding:"required"`
 	Type            uint    `json:"type" form:"type" binding:"required"`
 }

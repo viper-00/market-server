@@ -43,7 +43,7 @@ func (m *MService) GetMarketEvent(c *gin.Context, req request.GetMarketEvent) (r
 	eventPlayResponse.PledgeAmount = eventPlay.PledgeAmount
 
 	var orderModel []model.EventOrder
-	err = global.MARKET_DB.Where("event_id = ?", eventModel.ID).Find(&orderModel).Error
+	err = global.MARKET_DB.Where("event_id = ?", eventModel.ID).Order("id desc").Find(&orderModel).Error
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		return
