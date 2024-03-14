@@ -6,8 +6,10 @@ import (
 	"market/global/constant"
 	"market/model"
 	"market/model/market/request"
+	sweepUtils "market/sweep/utils"
 	"market/utils"
 	"market/utils/wallet"
+	"math/big"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -85,43 +87,42 @@ func (m *MService) CreateMarketEventOrder(c *gin.Context, req request.CreateMark
 	return
 }
 
-func (m *MService) SettleMarketEventOrder(c *gin.Context, req request.SettleMarketOrder) (err error) {
+func (m *MService) SettleMarketEventOrder(c *gin.Context, req request.SettleMarketOrder) (interface{}, error) {
 	userModel, err := m.GetUserInfo(c)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
-		return
+		return nil, err
 	}
 
-	// chainId, _ := c.Get("chainId")
-	// intChainId := int(chainId.(float64))
+	chainId, _ := c.Get("chainId")
+	intChainId := int(chainId.(float64))
 
-	eventModel, codeErr := m.GetMarketEventByUniqueCode(req.EventUniqueCode)
-	if codeErr != nil {
-		global.MARKET_LOG.Error(codeErr.Error())
-		return codeErr
+	eventModel, err := m.GetMarketEventByUniqueCode(req.EventUniqueCode)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return nil, err
 	}
 
 	if eventModel.UserId != userModel.ID || eventModel.Password != utils.EncryptoThroughMd5([]byte(req.Password)) {
-		err = errors.New("you don't have permission to perform this operation")
-		return
+		return nil, errors.New("you don't have permission to perform this operation")
 	}
 
 	if eventModel.ExpireTime.After(time.Now()) {
-		return errors.New("the time has not come yet")
+		return nil, errors.New("the time has not come yet")
 	}
 
 	var eventPlay model.EventPlay
 	err = global.MARKET_DB.Where("id = ? AND status = 1", eventModel.PlayId).First(&eventPlay).Error
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
-		return
+		return nil, err
 	}
 
 	var eventOrders []model.EventOrder
 	err = global.MARKET_DB.Where("event_id = ?", eventModel.ID).Order("id desc").Find(&eventOrders).Error
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
-		return
+		return nil, err
 	}
 
 	allPlays := constant.AllPlays[eventPlay.Title]
@@ -137,61 +138,133 @@ func (m *MService) SettleMarketEventOrder(c *gin.Context, req request.SettleMark
 					buyPlays += 1
 					break
 				} else if o.OrderType == 2 {
-					return errors.New("some orders are not completed")
+					return nil, errors.New("some orders are not completed")
 				}
 			}
 		}
 	}
 
 	if buyPlays != len(allPlays) {
-		return errors.New("some orders are not completed")
+		return nil, errors.New("some orders are not completed")
 	}
 
 	// Get random results
 	randomResult := utils.GetRandomValueFromStringArray(allPlays)
 
-	var vitroyOrder model.EventOrder
-	err = global.MARKET_DB.Where("order_type = 1 AND hash != ? AND order_status = 1 AND play_value = ?", "", randomResult).Order("id desc").First(&vitroyOrder).Error
+	var winnerOrder model.EventOrder
+	err = global.MARKET_DB.Where("order_type = 1 AND hash != ? AND order_status = 1 AND play_value = ?", "", randomResult).Order("id desc").First(&winnerOrder).Error
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
-		return
+		return nil, err
 	}
 
-	var (
-		totalCapitalPoolAmount float64 = 0
-		depositAmount          float64 = 0
-		totalBuyAmount         float64 = 0
-		totalSellAmount        float64 = 0
-		victoryAmount          float64 = 0
+	// winnerWallet
+	var winnerWallet model.User
+	err = global.MARKET_DB.Where("id = ? AND status = 1", winnerOrder.UserId).First(&winnerWallet).Error
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return nil, err
+	}
 
-		victoryIncomeRate  float64 = 0
-		bankerIncomeRate   float64 = 0
-		platformIncomeRate float64 = 0
+	// bankerWallet
+	var bankerWallet model.User
+	err = global.MARKET_DB.Where("id = ? AND status = 1", eventModel.UserId).First(&bankerWallet).Error
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return nil, err
+	}
+
+	// 资金池：押金+总买钱（A+O）+总卖钱
+	// 获取总收益：资金池-买钱（A）-押金-卖钱（O）
+	// A：买钱（A）
+	// B：押金
+	// D：总卖钱（O）
+	// 收益率分配（百分比）：
+	// A：买钱(A)/总买钱（O）
+	// B：（1-买钱(A)/总买钱（O））/2
+	// C：（1-买钱(A)/总买钱（O））/2
+
+	var (
+		depositAmount   float64 = 0
+		totalBuyAmount  float64 = 0
+		totalSellAmount float64 = 0
+		victoryAmount   float64 = 0
+		splitAmount     float64 = 0
+
+		victoryIncomeRate float64 = 0
+		bankerIncomeRate  float64 = 0
+		// platformIncomeRate float64 = 0
+
+		tokenAddresses  []string
+		sendToAddresses []string
+		sendValues      []big.Int
 	)
 
 	depositAmount = eventPlay.PledgeAmount
 
+	isSupport, _, tokenContractAddress, decimals := sweepUtils.GetContractInfoByChainIdAndSymbol(intChainId, constant.USDT)
+	if !isSupport {
+		return nil, errors.New("contract address not found")
+	}
+
+	// 1. 发送资金 - 押金
+	tokenAddresses = append(tokenAddresses, tokenContractAddress)
+	sendToAddresses = append(sendToAddresses, bankerWallet.ContractAddress)
+	sendValues = append(sendValues, *big.NewInt(utils.FormatToOriginalValue(depositAmount, decimals)))
+
+	// 2. 发送资金 - W买钱
+	tokenAddresses = append(tokenAddresses, tokenContractAddress)
+	sendToAddresses = append(sendToAddresses, winnerWallet.ContractAddress)
+	sendValues = append(sendValues, *big.NewInt(utils.FormatToOriginalValue(winnerOrder.Amount, decimals)))
+
+	// 3 发送资金 - 所有卖钱
 	for _, o := range eventOrders {
 		if o.OrderType == 1 {
 			totalBuyAmount += o.Amount
 		} else if o.OrderType == 2 {
 			totalSellAmount += o.Amount
+
+			var sellUser model.User
+			err = global.MARKET_DB.Where("id = ? AND status = 1", o.UserId).First(&sellUser).Error
+			if err != nil {
+				global.MARKET_LOG.Error(err.Error())
+				return nil, err
+			}
+			tokenAddresses = append(tokenAddresses, tokenContractAddress)
+			sendToAddresses = append(sendToAddresses, sellUser.ContractAddress)
+			sendValues = append(sendValues, *big.NewInt(utils.FormatToOriginalValue(o.Amount, decimals)))
 		}
 	}
 
-	victoryAmount = vitroyOrder.Amount
+	victoryAmount = winnerOrder.Amount
+	splitAmount = totalBuyAmount - victoryAmount
 
-	victoryIncomeRate = ""
+	victoryIncomeRate = victoryAmount / totalBuyAmount
+	bankerIncomeRate = (1 - (victoryIncomeRate)) / 2
+	// platformIncomeRate = (1 - (victoryIncomeRate)) / 2
 
-	return
+	// 发送资金 - 收益 - 买家
+	tokenAddresses = append(tokenAddresses, tokenContractAddress)
+	sendToAddresses = append(sendToAddresses, winnerWallet.ContractAddress)
+	sendValues = append(sendValues, *big.NewInt(utils.FormatToOriginalValue(splitAmount*victoryIncomeRate, decimals)))
+
+	// 发送资金 - 收益 - 庄家
+	tokenAddresses = append(tokenAddresses, tokenContractAddress)
+	sendToAddresses = append(sendToAddresses, bankerWallet.ContractAddress)
+	sendValues = append(sendValues, *big.NewInt(utils.FormatToOriginalValue(splitAmount*bankerIncomeRate, decimals)))
+
+	// 发送资金 - 收益 - 平台（不发）
+	// tokenAddresses = append(tokenAddresses, tokenContractAddress)
+	// sendToAddresses = append(sendToAddresses, "")
+	// sendValues = append(sendValues, *big.NewInt(utils.FormatToOriginalValue(splitAmount * platformIncomeRate, decimals)))
+
+	hash, err := wallet.TransferAssetToMoreReceiveAddres(intChainId, tokenAddresses, sendToAddresses, sendValues)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return nil, err
+	}
+
+	return map[string]interface{}{
+		"hash": hash,
+	}, nil
 }
-
-// 资金池：押金+买钱（A+O）+卖钱
-// 获取总收益：资金池-买钱（A）-押金-卖钱（O）
-// A：买钱（A）
-// B：押金
-// D：卖钱（O）
-// 总收益分配（百分比）：
-// A：买钱/买钱（A+O）
-// B：（1-买钱/买钱（A+O））/2
-// C：（1-买钱/买钱（A+O））/2

@@ -38,16 +38,19 @@ type EventPlayType string
 
 var (
 	EVENT_PLAY_TWENTYSIX EventPlayType = "TwentySixLetters"
+	EVENT_PLAY_THREE     EventPlayType = "ThreeLetters"
 )
 
 var EventPlayTypeValue []string
 
 var (
 	EVENT_PLAY_TWENTYSIX_VALUE = []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "S", "Y", "Z"}
+	EVENT_PLAY_THREE_VALUE     = []string{"A", "B", "C"}
 )
 
 var AllPlays = map[string][]string{
 	string(EVENT_PLAY_TWENTYSIX): EVENT_PLAY_TWENTYSIX_VALUE,
+	string(EVENT_PLAY_THREE):     EVENT_PLAY_THREE_VALUE,
 }
 
 var AllOrderTypes = map[uint]string{

@@ -18,6 +18,7 @@ type Event struct {
 	ResolverAddress   string    `json:"rosolver_address" gorm:"comment:rosolver_address"`
 	EventStatus       int       `json:"event_status" gorm:"comment:event_status"` //1: normal
 	Password          string    `json:"-" gorm:"comment:password"`
+	PledgeHash        string    `json:"pledge_hash" gorm:"comment:pledge_hash"`
 }
 
 func (Event) TableName() string {

@@ -8,6 +8,7 @@ import (
 	"market/model/market/request"
 	"market/model/market/response"
 	"market/utils"
+	"market/utils/wallet"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -108,6 +109,9 @@ func (m *MService) CreateMarketEvent(c *gin.Context, req request.CreateMarketEve
 		return
 	}
 
+	chainId, _ := c.Get("chainId")
+	intChainId := int(chainId.(float64))
+
 	var event model.Event
 	event.UserId = userModel.ID
 	event.Title = req.Title
@@ -122,6 +126,13 @@ func (m *MService) CreateMarketEvent(c *gin.Context, req request.CreateMarketEve
 		return
 	}
 
+	// send pledge amount to receive address
+	hash, err := wallet.TransferAssetToReceiveAddress(intChainId, userModel.ContractAddress, play.PledgeAmount)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return
+	}
+
 	event.PlayId = play.ID
 	event.EventLogo = req.EventLogo
 	event.SettlementAddress = req.SettlementAddress
@@ -129,6 +140,7 @@ func (m *MService) CreateMarketEvent(c *gin.Context, req request.CreateMarketEve
 	event.EventStatus = 1
 	event.Password = utils.EncryptoThroughMd5([]byte(req.Password))
 	event.Status = 1
+	event.PledgeHash = hash
 
 	err = global.MARKET_DB.Save(&event).Error
 	if err != nil {
@@ -138,6 +150,7 @@ func (m *MService) CreateMarketEvent(c *gin.Context, req request.CreateMarketEve
 
 	return map[string]interface{}{
 		"unique_code": event.UniqueWebsiteCode,
+		"pledge_hash": hash,
 	}, nil
 }
 
@@ -149,8 +162,7 @@ func (m *MService) UpdateMarketEvent(c *gin.Context, req request.UpdateMarketEve
 	}
 
 	if event.Password != utils.EncryptoThroughMd5([]byte(req.Password)) {
-		err = errors.New("Incorrect password")
-		return
+		return errors.New("incorrect password")
 	}
 
 	err = global.MARKET_DB.Model(&model.Event{}).Where("id = ?", event.ID).Updates(map[string]interface{}{

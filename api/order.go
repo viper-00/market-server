@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 func (n *MarketApi) CreateMarketEventOrder(c *gin.Context) {
@@ -46,14 +47,14 @@ func (n *MarketApi) SettleMarketEventOrder(c *gin.Context) {
 		return
 	}
 
-	err = service.MarketService.SettleMarketEventOrder(c, order)
+	result, err := service.MarketService.SettleMarketEventOrder(c, order)
 	if err != nil {
-		global.MARKET_LOG.Error(err.Error())
-		res = common.FailWithMessage(err.Error())
+		global.MARKET_LOG.Error(err.Error(), zap.Error(err))
+		res = common.FailWithDetailed(common.Error, err.Error(), result)
 		c.JSON(http.StatusOK, res)
 		return
 	}
 
-	res = common.OkWithMessage("execution succeed")
+	res = common.OKWithData(result)
 	c.JSON(http.StatusOK, res)
 }

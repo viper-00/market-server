@@ -15,27 +15,6 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
-func UserWalletFromContract(chainId int, ownerPrivacyKey, ownerPublicKey, callContractAddress string, tokenAddresses, sendToAddresses []string, sendValues []big.Int) (err error) {
-	var gasLimit uint64 = 0
-
-	rpc := constant.GetRPCUrlByNetwork(chainId)
-	if rpc == "" {
-		return errors.New("chain not support")
-	}
-
-	isSupport, gasLimit := GetCallWithdrawContractGasLimitFromChainId(chainId)
-	if !isSupport {
-		return errors.New("chain not support")
-	}
-
-	hash, err := CallWithdrawByCollectionContract(rpc, ownerPrivacyKey, ownerPublicKey, callContractAddress, tokenAddresses, sendToAddresses, sendValues, gasLimit)
-	if err != nil {
-		return
-	}
-
-	return MonitorTxStatus(chainId, hash)
-}
-
 func GenerateEthereumCollectionContract(chainId int, ownerPublicKey string) (contractAddress string, err error) {
 	var gasLimit uint64 = 0
 
@@ -93,14 +72,14 @@ func GetCallCreateContractGasLimitFromChainId(chainId int) (bool, uint64) {
 	return false, 0
 }
 
-func GetCallWithdrawContractGasLimitFromChainId(chainId int) (bool, uint64) {
-	switch chainId {
-	case constant.OP_SEPOLIA:
-		return true, 60000
-	}
+// func GetCallWithdrawContractGasLimitFromChainId(chainId int) (bool, uint64) {
+// 	switch chainId {
+// 	case constant.OP_SEPOLIA:
+// 		return true, 60000
+// 	}
 
-	return false, 0
-}
+// 	return false, 0
+// }
 
 func GetNewContractAddressByTxHash(chainId int, hash, callContractAddress string) (contractAddress string, err error) {
 	rpc := constant.GetRPCUrlByNetwork(chainId)
@@ -227,6 +206,28 @@ func TransferAssetToReceiveAddress(chainId int, callContractAddress string, send
 	var gasLimit uint64 = 100000
 
 	hash, err = CallWithdrawByCollectionContract(rpc, global.MARKET_CONFIG.GeneralAccount.Op.PrivateKey, global.MARKET_CONFIG.GeneralAccount.Op.PublicKey, callContractAddress, tokenAddresses, sendToAddresses, sendValues, gasLimit)
+	if err != nil {
+		return "", err
+	}
+
+	err = MonitorTxStatus(chainId, hash)
+	if err != nil {
+		return "", err
+	}
+
+	return hash, nil
+}
+
+func TransferAssetToMoreReceiveAddres(chainId int, tokenAddresses, sendToAddresses []string, sendValues []big.Int) (hash string, err error) {
+
+	rpc := constant.GetRPCUrlByNetwork(chainId)
+	if rpc == "" {
+		return "", errors.New("chain not support")
+	}
+
+	var gasLimit uint64 = 100000
+
+	hash, err = CallWithdrawByCollectionContract(rpc, global.MARKET_CONFIG.GeneralAccount.Op.PrivateKey, global.MARKET_CONFIG.GeneralAccount.Op.PublicKey, global.MARKET_CONFIG.GeneralAccount.Op.ReceiveAccount, tokenAddresses, sendToAddresses, sendValues, gasLimit)
 	if err != nil {
 		return "", err
 	}
