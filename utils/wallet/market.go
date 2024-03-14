@@ -111,11 +111,11 @@ func GetNewContractAddressByTxHash(chainId int, hash, callContractAddress string
 	var receipt *types.Receipt
 
 	for {
-		receipt, err = GetTransactionByHash(rpc, hash)
+		receipt, err = GetTransactionReceiptByHash(rpc, hash)
 		if err == nil {
 			break
 		}
-		time.Sleep(1)
+		time.Sleep(time.Second * 1)
 		global.MARKET_LOG.Info(fmt.Sprintf("retry the GetTransactionByHash, hash: %s, chainId: %d", hash, chainId))
 	}
 
@@ -143,11 +143,11 @@ func MonitorTxStatus(chainId int, hash string) (err error) {
 	var receipt *types.Receipt
 
 	for {
-		receipt, err = GetTransactionByHash(rpc, hash)
+		receipt, err = GetTransactionReceiptByHash(rpc, hash)
 		if err == nil {
 			break
 		}
-		time.Sleep(1)
+		time.Sleep(time.Second * 1)
 		// global.MARKET_LOG.Info(fmt.Sprintf("retry the MonitorTxStatus, hash: %s, chainId: %d", hash, chainId))
 	}
 

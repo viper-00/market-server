@@ -28,3 +28,19 @@ func EncryptoThroughMd5(str []byte) string {
 	hexString := hex.EncodeToString(hash[:])
 	return hexString
 }
+
+func GetRandomValueFromStringArray(strs []string) string {
+	if len(strs) > 0 {
+		return ""
+	}
+
+	if len(strs) == 1 {
+		return strs[0]
+	}
+
+	rand.Seed(time.Now().UnixNano())
+
+	randomIndex := rand.Intn(len(strs))
+
+	return strs[randomIndex]
+}

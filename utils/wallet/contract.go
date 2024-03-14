@@ -136,7 +136,7 @@ func GetEthBalanceByAddress(rpc, address string) (balance *big.Int, err error) {
 	return balance, nil
 }
 
-func GetTransactionByHash(rpc, hash string) (tx *types.Receipt, err error) {
+func GetTransactionReceiptByHash(rpc, hash string) (tx *types.Receipt, err error) {
 	client, err := ethclient.Dial(rpc)
 	if err != nil {
 		return
@@ -149,4 +149,19 @@ func GetTransactionByHash(rpc, hash string) (tx *types.Receipt, err error) {
 	}
 
 	return receipt, nil
+}
+
+func GetTransactionByHash(rpc, hash string) (tx *types.Transaction, isPending bool, err error) {
+	client, err := ethclient.Dial(rpc)
+	if err != nil {
+		return
+	}
+	defer client.Close()
+
+	transaction, isPending, err := client.TransactionByHash(context.Background(), common.HexToHash((hash)))
+	if err != nil {
+		return
+	}
+
+	return transaction, isPending, nil
 }

@@ -266,7 +266,7 @@ func TestCallGetContractAddressFromHash(t *testing.T) {
 	rpc := "https://optimism-sepolia.blockpi.network/v1/rpc/public"
 	hash := "0xea48f36c01add64c6bda581787cf28c6a18a8d5975c2ab2e12add3742dbf3fe6"
 
-	receipt, err := GetTransactionByHash(rpc, hash)
+	receipt, err := GetTransactionReceiptByHash(rpc, hash)
 	if err != nil {
 		t.Log(err.Error())
 	}

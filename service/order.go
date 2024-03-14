@@ -102,12 +102,12 @@ func (m *MService) SettleMarketEventOrder(c *gin.Context, req request.SettleMark
 	}
 
 	if eventModel.UserId != userModel.ID || eventModel.Password != utils.EncryptoThroughMd5([]byte(req.Password)) {
-		err = errors.New("You don't have permission to perform this operation")
+		err = errors.New("you don't have permission to perform this operation")
 		return
 	}
 
 	if eventModel.ExpireTime.After(time.Now()) {
-		return errors.New("The time has not come yet")
+		return errors.New("the time has not come yet")
 	}
 
 	var eventPlay model.EventPlay
@@ -125,6 +125,7 @@ func (m *MService) SettleMarketEventOrder(c *gin.Context, req request.SettleMark
 	}
 
 	allPlays := constant.AllPlays[eventPlay.Title]
+
 	var (
 		buyPlays int = 0
 	)
@@ -136,21 +137,39 @@ func (m *MService) SettleMarketEventOrder(c *gin.Context, req request.SettleMark
 					buyPlays += 1
 					break
 				} else if o.OrderType == 2 {
-					return errors.New("Some orders are not completed")
+					return errors.New("some orders are not completed")
 				}
 			}
 		}
 	}
 
 	if buyPlays != len(allPlays) {
-		return errors.New("Some orders are not completed")
+		return errors.New("some orders are not completed")
+	}
+
+	// Get random results
+	randomResult := utils.GetRandomValueFromStringArray(allPlays)
+
+	var vitroyOrder model.EventOrder
+	err = global.MARKET_DB.Where("order_type = 1 AND hash != ? AND order_status = 1 AND play_value = ?", "", randomResult).Order("id desc").First(&vitroyOrder).Error
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return
 	}
 
 	var (
-		// totalAmount     float64 = 0
-		totalBuyAmount  float64 = 0
-		totalSellAmount float64 = 0
+		totalCapitalPoolAmount float64 = 0
+		depositAmount          float64 = 0
+		totalBuyAmount         float64 = 0
+		totalSellAmount        float64 = 0
+		victoryAmount          float64 = 0
+
+		victoryIncomeRate  float64 = 0
+		bankerIncomeRate   float64 = 0
+		platformIncomeRate float64 = 0
 	)
+
+	depositAmount = eventPlay.PledgeAmount
 
 	for _, o := range eventOrders {
 		if o.OrderType == 1 {
@@ -160,5 +179,19 @@ func (m *MService) SettleMarketEventOrder(c *gin.Context, req request.SettleMark
 		}
 	}
 
+	victoryAmount = vitroyOrder.Amount
+
+	victoryIncomeRate = ""
+
 	return
 }
+
+// 资金池：押金+买钱（A+O）+卖钱
+// 获取总收益：资金池-买钱（A）-押金-卖钱（O）
+// A：买钱（A）
+// B：押金
+// D：卖钱（O）
+// 总收益分配（百分比）：
+// A：买钱/买钱（A+O）
+// B：（1-买钱/买钱（A+O））/2
+// C：（1-买钱/买钱（A+O））/2
