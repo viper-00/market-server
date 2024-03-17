@@ -4,10 +4,10 @@ import "market/model/common"
 
 type UserSetting struct {
 	common.MARKET_MODEL
-	UserId    uint   `json:"user_id" gorm:"user_id"`
+	UserId    uint   `json:"-" gorm:"user_id"`
 	Email     string `json:"email" gorm:"comment:email"`
 	Username  string `json:"username" gorm:"comment:username"`
-	AvatarUrl string `json:"avatarUrl" gorm:"comment:avatarUrl"`
+	AvatarUrl string `json:"avatar_url" gorm:"comment:avatar_url"`
 	Bio       string `json:"bio" gorm:"comment:bio"`
 }
 

@@ -57,4 +57,6 @@ type EventOrderResponse struct {
 	OrderType           string  `json:"order_type"`
 	UserContractAddress string  `json:"user_address"`
 	Username            string  `json:"username"`
+	CreatedTime         int     `json:"created_time"`
+	Hash                string  `json:"hash"`
 }

@@ -76,6 +76,7 @@ func (m *MService) CreateMarketEventOrder(c *gin.Context, req request.CreateMark
 		order.OrderType = req.Type
 		order.OrderStatus = 1
 		order.Amount = buyOrder.Amount
+		order.Status = 1
 
 		err = global.MARKET_DB.Save(&order).Error
 		if err != nil {
@@ -119,7 +120,7 @@ func (m *MService) SettleMarketEventOrder(c *gin.Context, req request.SettleMark
 	}
 
 	var eventOrders []model.EventOrder
-	err = global.MARKET_DB.Where("event_id = ?", eventModel.ID).Order("id desc").Find(&eventOrders).Error
+	err = global.MARKET_DB.Where("event_id = ? AND status = 1", eventModel.ID).Order("id desc").Find(&eventOrders).Error
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		return nil, err
@@ -134,17 +135,16 @@ func (m *MService) SettleMarketEventOrder(c *gin.Context, req request.SettleMark
 	for _, v := range allPlays {
 		for _, o := range eventOrders {
 			if v == o.PlayValue {
-				if o.OrderType == 1 {
-					buyPlays += 1
-					break
-				} else if o.OrderType == 2 {
+				if o.OrderType != 1 {
 					return nil, errors.New("some orders are not completed")
 				}
+				buyPlays += 1
+				break
 			}
 		}
 	}
 
-	if buyPlays != len(allPlays) {
+	if buyPlays != len(allPlays) || len(allPlays) == 0 {
 		return nil, errors.New("some orders are not completed")
 	}
 
@@ -259,6 +259,18 @@ func (m *MService) SettleMarketEventOrder(c *gin.Context, req request.SettleMark
 	// sendValues = append(sendValues, *big.NewInt(utils.FormatToOriginalValue(splitAmount * platformIncomeRate, decimals)))
 
 	hash, err := wallet.TransferAssetToMoreReceiveAddres(intChainId, tokenAddresses, sendToAddresses, sendValues)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return nil, err
+	}
+
+	// update event
+	err = global.MARKET_DB.Where("id = ? AND event_status = 1 AND status = 1", eventModel.ID).First(&model.Event{}).Updates(map[string]interface{}{
+		"event_status":    2,
+		"settlement_hash": hash,
+		"settlement_time": time.Now(),
+	}).Error
+
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		return nil, err

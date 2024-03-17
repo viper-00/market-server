@@ -112,7 +112,7 @@ func GetAllRPCUrlByNetwork(id int) []string {
 }
 
 func GetRPCUrlByNetwork(id int) string {
-	rand.Seed(time.Now().UnixNano())
+	rand.Seed(time.Now().UnixMilli())
 
 	switch id {
 	case ETH_MAINNET:
@@ -157,7 +157,7 @@ func GetRPCUrlByNetwork(id int) string {
 }
 
 func getRandomAlchemyKey(isMainnet bool) string {
-	rand.Seed(time.Now().UnixNano())
+	rand.Seed(time.Now().UnixMilli())
 
 	if isMainnet {
 		index := rand.Intn(len(AlchemyMainnetKey))

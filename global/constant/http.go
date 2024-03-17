@@ -17,7 +17,7 @@ var (
 )
 
 func GetHTTPUrlByNetwork(network int) string {
-	rand.Seed(time.Now().UnixNano())
+	rand.Seed(time.Now().UnixMilli())
 
 	switch network {
 	case TRON_MAINNET:
@@ -30,7 +30,7 @@ func GetHTTPUrlByNetwork(network int) string {
 }
 
 func GetRandomHTTPKeyByNetwork(network int) string {
-	rand.Seed(time.Now().UnixNano())
+	rand.Seed(time.Now().UnixMilli())
 
 	switch network {
 	case TRON_MAINNET:

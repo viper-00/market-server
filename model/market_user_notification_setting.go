@@ -5,14 +5,13 @@ import "market/model/common"
 type UserNotificationSetting struct {
 	common.MARKET_MODEL
 	UserId            uint `json:"user_id" gorm:"user_id"`
-	EmailUpdate       bool `json:"email_update" gorm:"comment:email_update"`
-	MarketUpdate      bool `json:"market_update" gorm:"comment:market_update"`
-	DailyUpdate       bool `json:"daily_update" gorm:"comment:daily_update"`
-	IncomingUpdate    bool `json:"incoming_update" gorm:"comment:incoming_update"`
-	OutgoingUpdate    bool `json:"outgoing_update" gorm:"comment:outgoing_update"`
-	EventUpdate       bool `json:"event_update" gorm:"comment:event_update"`
-	OrderUpdate       bool `json:"order_update" gorm:"comment:order_update"`
-	CryptoPriceUpdate bool `json:"crypto_price_update" gorm:"comment:crypto_price_update"`
+	EmailUpdate       int  `json:"email_update" gorm:"comment:email_update"`
+	DailyUpdate       int  `json:"daily_update" gorm:"comment:daily_update"`
+	IncomingUpdate    int  `json:"incoming_update" gorm:"comment:incoming_update"`
+	OutgoingUpdate    int  `json:"outgoing_update" gorm:"comment:outgoing_update"`
+	EventUpdate       int  `json:"event_update" gorm:"comment:event_update"`
+	OrderUpdate       int  `json:"order_update" gorm:"comment:order_update"`
+	CryptoPriceUpdate int  `json:"crypto_price_update" gorm:"comment:crypto_price_update"` // 1: on 2: off
 }
 
 func (UserNotificationSetting) TableName() string {

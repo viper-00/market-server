@@ -15,13 +15,13 @@ import (
 )
 
 func (m *MService) GetMarketEventByUniqueCode(code string) (model model.Event, err error) {
-	err = global.MARKET_DB.Where("unique_website_code = ? AND event_status = 1", code).First(&model).Error
+	err = global.MARKET_DB.Where("unique_website_code = ?", code).First(&model).Error
 	return
 }
 
 func (m *MService) GetMarketEvent(c *gin.Context, req request.GetMarketEvent) (result interface{}, err error) {
 	var eventModel model.Event
-	err = global.MARKET_DB.Where("unique_website_code = ? AND event_status = 1 AND status = 1", req.Code).First(&eventModel).Error
+	err = global.MARKET_DB.Where("unique_website_code = ? AND status = 1", req.Code).First(&eventModel).Error
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		return
@@ -50,7 +50,9 @@ func (m *MService) GetMarketEvent(c *gin.Context, req request.GetMarketEvent) (r
 		return
 	}
 
-	var values []response.EventPlayValueResponse
+	var (
+		values []response.EventPlayValueResponse
+	)
 
 	for _, v := range constant.AllPlays[eventPlay.Title] {
 		var value response.EventPlayValueResponse
@@ -61,6 +63,7 @@ func (m *MService) GetMarketEvent(c *gin.Context, req request.GetMarketEvent) (r
 					var singleOrder response.EventOrderResponse
 					singleOrder.Amount = o.Amount
 					singleOrder.OrderType = constant.AllOrderTypes[o.OrderType]
+					singleOrder.CreatedTime = int(o.CreatedAt.UnixMilli())
 
 					var user model.User
 					err = global.MARKET_DB.Where("id = ? AND status = 1", o.UserId).First(&user).Error
@@ -88,6 +91,28 @@ func (m *MService) GetMarketEvent(c *gin.Context, req request.GetMarketEvent) (r
 
 	eventPlayResponse.Values = values
 
+	var (
+		isSettlement     = false
+		buyPlays     int = 0
+	)
+
+	allPlays := constant.AllPlays[eventPlay.Title]
+
+	for _, v := range allPlays {
+		for _, o := range orderModel {
+			if v == o.PlayValue {
+				if o.OrderType == 1 {
+					buyPlays += 1
+				}
+				break
+			}
+		}
+	}
+
+	if buyPlays == len(allPlays) && len(allPlays) != 0 {
+		isSettlement = true
+	}
+
 	var eventComments []model.EventComment
 	err = global.MARKET_DB.Where("event_id = ? AND status = 1", eventModel.ID).Find(&eventComments).Error
 	if err != nil {
@@ -96,9 +121,10 @@ func (m *MService) GetMarketEvent(c *gin.Context, req request.GetMarketEvent) (r
 	}
 
 	return map[string]interface{}{
-		"event":   eventModel,
-		"play":    eventPlayResponse,
-		"comment": eventComments,
+		"event":         eventModel,
+		"play":          eventPlayResponse,
+		"comment":       eventComments,
+		"is_settlement": isSettlement,
 	}, nil
 }
 
@@ -135,7 +161,6 @@ func (m *MService) CreateMarketEvent(c *gin.Context, req request.CreateMarketEve
 
 	event.PlayId = play.ID
 	event.EventLogo = req.EventLogo
-	event.SettlementAddress = req.SettlementAddress
 	event.ResolverAddress = req.ResolverAddress
 	event.EventStatus = 1
 	event.Password = utils.EncryptoThroughMd5([]byte(req.Password))

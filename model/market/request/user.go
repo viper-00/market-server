@@ -22,15 +22,21 @@ type UpdateUserSetting struct {
 	Bio       string `json:"bio" form:"bio"`
 }
 
+type GetUserProfile struct {
+	Address string `json:"address" form:"address" binding:"required"`
+}
+
 type UpdateUserNotificationSetting struct {
-	EmailUpdate       bool `json:"email_update"`
-	MarketUpdate      bool `json:"market_update"`
-	DailyUpdate       bool `json:"daily_update"`
-	IncomingUpdate    bool `json:"incoming_update"`
-	OutgoingUpdate    bool `json:"outgoing_update"`
-	EventUpdate       bool `json:"event_update"`
-	OrderUpdate       bool `json:"order_update"`
-	CryptoPriceUpdate bool `json:"crypto_price_update"`
+	// EmailUpdate       bool `json:"email_update"`
+	// MarketUpdate      bool `json:"market_update"`
+	// DailyUpdate       bool `json:"daily_update"`
+	// IncomingUpdate    bool `json:"incoming_update"`
+	// OutgoingUpdate    bool `json:"outgoing_update"`
+	// EventUpdate       bool `json:"event_update"`
+	// OrderUpdate       bool `json:"order_update"`
+	// CryptoPriceUpdate bool `json:"crypto_price_update"`
+	Type   string `json:"type"`
+	Status int    `json:"status"`
 }
 
 type CreateUserAffiliate struct{}

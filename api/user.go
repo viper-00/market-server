@@ -97,6 +97,44 @@ func (n *MarketApi) GetUserInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+func (n *MarketApi) GetUserProfile(c *gin.Context) {
+	var res common.Response
+	var profile request.GetUserProfile
+
+	err := c.ShouldBind(&profile)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		res = common.FailWithMessage(err.Error())
+		c.JSON(http.StatusOK, res)
+		return
+	}
+	result, err := service.MarketService.GetUserProfile(c, profile)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		res = common.FailWithMessage(err.Error())
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
+	res = common.OKWithData(result)
+	c.JSON(http.StatusOK, res)
+}
+
+func (n *MarketApi) GetUserSetting(c *gin.Context) {
+	var res common.Response
+
+	result, err := service.MarketService.GetUserSetting(c)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		res = common.FailWithMessage(err.Error())
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
+	res = common.OKWithData(result)
+	c.JSON(http.StatusOK, res)
+}
+
 func (n *MarketApi) UpdateUserSetting(c *gin.Context) {
 	var res common.Response
 	var user request.UpdateUserSetting

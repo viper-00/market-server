@@ -48,7 +48,7 @@ func (m *MService) UserRegister(info request.UserRegister) error {
 				"email":           info.Email,
 				"invitation_code": randomString,
 				"chain_id":        info.ChainId,
-				"time":            time.Now().UTC().Unix(),
+				"time":            time.Now().UTC().UnixMilli(),
 			})
 
 			if err != nil {
@@ -156,7 +156,7 @@ func (n *MService) UserLogin(info request.UserLogin) (user response.User, err er
 			"email":           modelUser.Email,
 			"address":         modelUser.Address,
 			"contractAddress": modelUser.ContractAddress,
-			"time":            time.Now().UTC().Unix(),
+			"time":            time.Now().UTC().UnixMilli(),
 		})
 
 		if jwtErr != nil {
@@ -173,7 +173,7 @@ func (n *MService) UserLogin(info request.UserLogin) (user response.User, err er
 		user.UserName = modelUserSetting.Username
 		user.AvatarUrl = modelUserSetting.AvatarUrl
 		user.Bio = modelUserSetting.Bio
-		user.JoinedDate = modelUser.CreatedAt.Unix()
+		user.JoinedDate = modelUser.CreatedAt.UnixMilli()
 
 		if _, err = global.MARKET_REDIS.Set(context.Background(), user.Auth, info.Email, time.Hour*24).Result(); err != nil {
 			global.MARKET_LOG.Error(err.Error())
@@ -235,14 +235,14 @@ func (m *MService) InitializeAccount(chainId int, email string) (err error) {
 	// user notification of setting
 	var userNotificationSetting model.UserNotificationSetting
 	userNotificationSetting.UserId = user.ID
-	userNotificationSetting.EmailUpdate = false
-	userNotificationSetting.MarketUpdate = false
-	userNotificationSetting.DailyUpdate = false
-	userNotificationSetting.IncomingUpdate = false
-	userNotificationSetting.OutgoingUpdate = false
-	userNotificationSetting.EventUpdate = false
-	userNotificationSetting.OrderUpdate = false
-	userNotificationSetting.CryptoPriceUpdate = false
+	userNotificationSetting.EmailUpdate = 2
+	userNotificationSetting.DailyUpdate = 2
+	userNotificationSetting.IncomingUpdate = 2
+	userNotificationSetting.OutgoingUpdate = 2
+	userNotificationSetting.EventUpdate = 2
+	userNotificationSetting.OrderUpdate = 2
+	userNotificationSetting.CryptoPriceUpdate = 2
+	userNotificationSetting.Status = 1
 	err = global.MARKET_DB.Save(&userNotificationSetting).Error
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
@@ -272,6 +272,109 @@ func (m *MService) GetUserInfo(c *gin.Context) (model model.User, err error) {
 	return
 }
 
+func (m *MService) GetUserProfile(c *gin.Context, profile request.GetUserProfile) (interface{}, error) {
+	var user model.User
+	err := global.MARKET_DB.Where("contract_address = ? AND status = 1", profile.Address).First(&user).Error
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return nil, err
+	}
+
+	var setting model.UserSetting
+	err = global.MARKET_DB.Where("user_id = ? AND status = 1", user.ID).First(&setting).Error
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return nil, err
+	}
+
+	var events []model.Event
+	err = global.MARKET_DB.Where("user_id = ? AND status = 1", user.ID).Order("id desc").Find(&events).Error
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return nil, err
+	}
+
+	var orders []model.EventOrder
+	err = global.MARKET_DB.Where("user_id = ? AND status = 1", user.ID).Order("id desc").Find(&orders).Error
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return nil, err
+	}
+
+	var filterOrders []response.EventOrderResponse
+	for _, v := range orders {
+		var filterOrder response.EventOrderResponse
+		filterOrder.Amount = v.Amount
+		filterOrder.OrderType = constant.AllOrderTypes[v.OrderType]
+		filterOrder.CreatedTime = int(v.CreatedAt.UnixMilli())
+		filterOrder.Hash = v.Hash
+		filterOrders = append(filterOrders, filterOrder)
+	}
+
+	var comments []model.EventComment
+	err = global.MARKET_DB.Where("user_id = ? AND status = 1", user.ID).Order("id desc").Find(&comments).Error
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return nil, err
+	}
+
+	return map[string]interface{}{
+		"profile": map[string]interface{}{
+			"contract_address": user.ContractAddress,
+			"email":            user.Email,
+			"invitation_code":  user.InvitationCode,
+			"username":         setting.Username,
+			"avatar_url":       setting.AvatarUrl,
+			"bio":              setting.Bio,
+			"created_time":     user.CreatedAt.UnixMilli(),
+		},
+		"event":   events,
+		"order":   filterOrders,
+		"comment": comments,
+	}, nil
+}
+
+func (m *MService) GetUserSetting(c *gin.Context) (interface{}, error) {
+	user, err := m.GetUserInfo(c)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return nil, err
+	}
+
+	var setting model.UserSetting
+	err = global.MARKET_DB.Where("user_id = ? AND status = 1", user.ID).First(&setting).Error
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return nil, err
+	}
+
+	var notification model.UserNotificationSetting
+	err = global.MARKET_DB.Where("user_id = ? AND status = 1", user.ID).First(&notification).Error
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return nil, err
+	}
+
+	return map[string]interface{}{
+		"setting": map[string]interface{}{
+			"contract_address":    user.ContractAddress,
+			"email":               user.Email,
+			"invitation_code":     user.InvitationCode,
+			"username":            setting.Username,
+			"avatar_url":          setting.AvatarUrl,
+			"bio":                 setting.Bio,
+			"created_time":        user.CreatedAt.UnixMilli(),
+			"email_update":        notification.EmailUpdate,
+			"daily_update":        notification.DailyUpdate,
+			"incoming_update":     notification.IncomingUpdate,
+			"outgoing_update":     notification.OutgoingUpdate,
+			"event_update":        notification.EventUpdate,
+			"order_update":        notification.OrderUpdate,
+			"crypto_price_update": notification.CryptoPriceUpdate,
+		},
+	}, nil
+}
+
 func (m *MService) UpdateUserSetting(c *gin.Context, req request.UpdateUserSetting) (err error) {
 	user, err := m.GetUserInfo(c)
 	if err != nil {
@@ -279,11 +382,18 @@ func (m *MService) UpdateUserSetting(c *gin.Context, req request.UpdateUserSetti
 		return
 	}
 
-	err = global.MARKET_DB.Model(&model.UserSetting{}).Where("user_id = ?", user.ID).Updates(map[string]interface{}{
-		"username":  req.Username,
-		"avatarUrl": req.AvatarUrl,
-		"bio":       req.Bio,
-	}).Error
+	maps := make(map[string]interface{})
+	if req.Username != "" {
+		maps["username"] = req.Username
+	}
+	if req.AvatarUrl != "" {
+		maps["avatar_url"] = req.AvatarUrl
+	}
+	if req.Bio != "" {
+		maps["bio"] = req.Bio
+	}
+
+	err = global.MARKET_DB.Model(&model.UserSetting{}).Where("user_id = ?", user.ID).Updates(maps).Error
 
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
@@ -299,21 +409,63 @@ func (m *MService) UpdateUserNotificationSetting(c *gin.Context, req request.Upd
 		return
 	}
 
-	err = global.MARKET_DB.Model(&model.UserNotificationSetting{}).Where("user_id = ?", user.ID).Updates(map[string]interface{}{
-		"email_update":        req.EmailUpdate,
-		"market_update":       req.MarketUpdate,
-		"daily_update":        req.DailyUpdate,
-		"incoming_update":     req.IncomingUpdate,
-		"outgoing_update":     req.OutgoingUpdate,
-		"event_update":        req.EventUpdate,
-		"order_update":        req.OrderUpdate,
-		"crypto_price_update": req.CryptoPriceUpdate,
-	}).Error
+	if req.Status != 1 && req.Status != 2 {
+		return errors.New("no operation authority")
+	}
+
+	switch req.Type {
+	case "email":
+		err = global.MARKET_DB.Model(&model.UserNotificationSetting{}).Where("user_id = ?", user.ID).Updates(map[string]interface{}{
+			"email_update": req.Status,
+		}).Error
+	case "daily":
+		err = global.MARKET_DB.Model(&model.UserNotificationSetting{}).Where("user_id = ?", user.ID).Updates(map[string]interface{}{
+			"daily_update": req.Status,
+		}).Error
+	case "incoming":
+		err = global.MARKET_DB.Model(&model.UserNotificationSetting{}).Where("user_id = ?", user.ID).Updates(map[string]interface{}{
+			"incoming_update": req.Status,
+		}).Error
+	case "outgoing":
+		err = global.MARKET_DB.Model(&model.UserNotificationSetting{}).Where("user_id = ?", user.ID).Updates(map[string]interface{}{
+			"outgoing_update": req.Status,
+		}).Error
+	case "event":
+		err = global.MARKET_DB.Model(&model.UserNotificationSetting{}).Where("user_id = ?", user.ID).Updates(map[string]interface{}{
+			"event_update": req.Status,
+		}).Error
+	case "order":
+		err = global.MARKET_DB.Model(&model.UserNotificationSetting{}).Where("user_id = ?", user.ID).Updates(map[string]interface{}{
+			"order_update": req.Status,
+		}).Error
+	case "crypto":
+		err = global.MARKET_DB.Model(&model.UserNotificationSetting{}).Where("user_id = ?", user.ID).Updates(map[string]interface{}{
+			"crypto_price_update": req.Status,
+		}).Error
+	default:
+		return
+	}
+
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		return
 	}
 	return nil
+
+	// err = global.MARKET_DB.Model(&model.UserNotificationSetting{}).Where("user_id = ?", user.ID).Updates(map[string]interface{}{
+	// 	"email_update":        req.EmailUpdate,
+	// 	"daily_update":        req.DailyUpdate,
+	// 	"incoming_update":     req.IncomingUpdate,
+	// 	"outgoing_update":     req.OutgoingUpdate,
+	// 	"event_update":        req.EventUpdate,
+	// 	"order_update":        req.OrderUpdate,
+	// 	"crypto_price_update": req.CryptoPriceUpdate,
+	// }).Error
+	// if err != nil {
+	// 	global.MARKET_LOG.Error(err.Error())
+	// 	return
+	// }
+	// return nil
 }
 
 func (m *MService) CreateUserAffiliate(c *gin.Context, req request.CreateUserAffiliate) (result interface{}, err error) {

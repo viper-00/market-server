@@ -14,7 +14,7 @@ func GenerateStringRandomly(prefix string, length int) string {
 }
 
 func StringWithCharset(length int, charset []rune) string {
-	rand.Seed(time.Now().UnixNano())
+	rand.Seed(time.Now().UnixMilli())
 
 	b := make([]rune, length)
 	for i := range b {
@@ -30,7 +30,7 @@ func EncryptoThroughMd5(str []byte) string {
 }
 
 func GetRandomValueFromStringArray(strs []string) string {
-	if len(strs) > 0 {
+	if len(strs) == 0 {
 		return ""
 	}
 
@@ -38,7 +38,7 @@ func GetRandomValueFromStringArray(strs []string) string {
 		return strs[0]
 	}
 
-	rand.Seed(time.Now().UnixNano())
+	rand.Seed(time.Now().UnixMilli())
 
 	randomIndex := rand.Intn(len(strs))
 

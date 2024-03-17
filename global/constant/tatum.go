@@ -45,7 +45,7 @@ func IsNetworkSupportTatum(id int) bool {
 }
 
 func GetTatumRandomKeyByNetwork(id int) string {
-	rand.Seed(time.Now().UnixNano())
+	rand.Seed(time.Now().UnixMilli())
 
 	switch id {
 	case BTC_MAINNET, ETH_MAINNET, LTC_MAINNET, BSC_MAINNET, TRON_MAINNET:

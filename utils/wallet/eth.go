@@ -112,7 +112,8 @@ func CallWithdrawByCollectionContract(rpc, fromPri, fromPub, contractAddress str
 		tos = append(tos, common.HexToAddress(v))
 	}
 	for _, v := range sendValues {
-		values = append(values, &v)
+		copy := new(big.Int).Set(&v)
+		values = append(values, copy)
 	}
 
 	callData, err := marketContractABI.Pack(Withdraw, tokens, tos, values)

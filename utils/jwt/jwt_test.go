@@ -9,7 +9,7 @@ func TestCreateJWT(t *testing.T) {
 
 	jwt, err := CreateJWT(map[string]interface{}{
 		"email": "sdfsdf@qq.com",
-		"time":  time.Now().Unix(),
+		"time":  time.Now().UnixMilli(),
 	})
 	if err != nil {
 		t.Log(err.Error())

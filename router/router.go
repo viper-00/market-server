@@ -39,12 +39,13 @@ func (mRouter *MarketRouter) InitRouter(Router *gin.RouterGroup) {
 		clientRouter.GET("verify-invitation", api.VerifyInvitation)
 		clientRouter.POST("login", api.Login)
 		clientRouter.GET("crypto-price", api.GetCryptoPrice)
+		clientRouter.GET("user-profile", api.GetUserProfile)
 	}
 
 	userRouter := clientRouter.Group("/user")
 	userRouter.Use(middleware.ClientAuth())
 	{
-		userRouter.GET("user-info", api.GetUserInfo)
+		userRouter.GET("user-setting", api.GetUserSetting)
 		userRouter.PUT("user-setting", api.UpdateUserSetting)
 		userRouter.PUT("user-notification-setting", api.UpdateUserNotificationSetting)
 		userRouter.POST("user-affiliate", api.CreateUserAffiliate)
