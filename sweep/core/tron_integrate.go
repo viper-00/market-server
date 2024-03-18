@@ -343,30 +343,6 @@ func handleTriggerSmartContract(chainId int, publicKey *[]string, notifyRequest 
 		notifyRequest.Amount = utils.CalculateBalance(big.NewInt(int64(amountInt)), decimals)
 
 		handleNotification(chainId, publicKey, notifyRequest, fromAddress, toAddress)
-	case tron.BatchTransferFrom, tron.Collect, tron.SenderTransferFrom, tron.Withdraw:
-		handleTronAllInOne(chainId, publicKey, notifyRequest, txResponse)
-	}
-}
-
-func handleTronAllInOne(chainId int, publicKey *[]string, notifyRequest request.NotificationRequest, txResponse response.TronGetTxResponse) {
-	fromAddress := txResponse.RawData.Contract[0].Parameter.Value.OwnerAddress
-	toAddress := txResponse.RawData.Contract[0].Parameter.Value.ContractAddress
-	data := txResponse.RawData.Contract[0].Parameter.Value.Data
-	_, fromAddresses, toAddresses, tokens, amounts, err := tron.DecodeAllInOneTransactionInputData(chainId, txResponse.TxID, fromAddress, toAddress, data)
-	if err != nil {
-		global.MARKET_LOG.Error(fmt.Sprintf("%s -> %s", constant.GetChainName(chainId), err.Error()))
-		return
-	}
-
-	for i := range fromAddresses {
-		isSupportContract, contractName, _, decimals := sweepUtils.GetContractInfoByChainIdAndContractAddress(chainId, tokens[i])
-		if !isSupportContract {
-			continue
-		}
-
-		notifyRequest.Token = contractName
-		notifyRequest.Amount = utils.CalculateBalance(amounts[i], decimals)
-		handleNotification(chainId, publicKey, notifyRequest, fromAddresses[i], toAddresses[i])
 	}
 }
 

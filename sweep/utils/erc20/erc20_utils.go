@@ -20,33 +20,11 @@ var (
 	TransferFrom = "transferFrom"
 	Approve      = "approve"
 
-	BatchTransferFrom  = "batchTransferFrom"
-	Collect            = "collect"
-	SenderTransferFrom = "senderTransferFrom"
-	Withdraw           = "withdraw"
-
 	knownMethods = map[string]string{
 		"0xa9059cbb": Transfer,
 		"0x23b872dd": TransferFrom,
-
-		"0xb818f9e4": BatchTransferFrom,
-		"0x1e13eee1": Collect,
-		"0xb19385f7": SenderTransferFrom,
-		"0xf7ece0cf": Withdraw,
 	}
-
-	joinAllInOneContract = []string{BatchTransferFrom, Collect, SenderTransferFrom, Withdraw}
 )
-
-func hasJoinAllInOneContract(methodName string) bool {
-	for _, v := range joinAllInOneContract {
-		if v == methodName {
-			return true
-		}
-	}
-
-	return false
-}
 
 func IsHandleTokenTransaction(chainId int, hash, contractName, fromAddress, contractAddress, monitorAddress, data string) bool {
 	if !sweepUtils.IsChainJoinSweep(chainId) {
@@ -54,8 +32,6 @@ func IsHandleTokenTransaction(chainId int, hash, contractName, fromAddress, cont
 	}
 
 	switch contractName {
-	// case constant.ALLINONE:
-	// return handleAllInOneTransaction(chainId, hash, fromAddress, contractAddress, monitorAddress, data)
 	// case constant.PREDICTMARKET:
 	// 	return handlePredictMarketTransaction(chainId, hash, fromAddress, contractAddress, monitorAddress, data)
 	default:
@@ -68,170 +44,6 @@ func IsHandleTokenTransaction(chainId int, hash, contractName, fromAddress, cont
 // func handlePredictMarketTransaction(chainId int, hash, fromAddress, contractAddress, monitorAddress, data string) bool {
 
 // }
-
-func handleAllInOneTransaction(chainId int, hash, fromAddress, contractAddress, monitorAddress, data string) bool {
-	methodName, fromAddresses, toAddresses, tokens, amounts, err := DecodeAllInOneTransactionInputData(chainId, hash, fromAddress, contractAddress, data)
-
-	if err != nil {
-		return false
-	}
-
-	if methodName != "" && len(fromAddresses) == len(toAddresses) && len(toAddresses) == len(tokens) && len(tokens) == len(amounts) {
-		for _, from := range fromAddresses {
-			if utils.HexToAddress(monitorAddress) == from.String() {
-				return true
-			}
-		}
-
-		for _, to := range toAddresses {
-			if utils.HexToAddress(monitorAddress) == to.String() {
-				return true
-			}
-		}
-	}
-
-	return false
-}
-
-func DecodeAllInOneTransactionInputData(chainId int, hash, fromAddress, toAddress, data string) (string, []common.Address, []common.Address, []common.Address, []*big.Int, error) {
-	var err error
-
-	methodSigData := data[:10]
-	inputSigData := data[10:]
-
-	decodedData, err := hex.DecodeString(inputSigData)
-	if err != nil {
-		return "", nil, nil, nil, nil, err
-	}
-
-	file, err := os.Open("json/AllInOne.json")
-	if err != nil {
-		global.MARKET_LOG.Error(fmt.Sprintf("%s -> hash:%s, message:%s", constant.GetChainName(chainId), hash, err.Error()))
-		return "", nil, nil, nil, nil, err
-	}
-	defer file.Close()
-
-	contractABI, err := abi.JSON(file)
-	if err != nil {
-		global.MARKET_LOG.Error(fmt.Sprintf("%s -> hash:%s, message:%s", constant.GetChainName(chainId), hash, err.Error()))
-		return "", nil, nil, nil, nil, err
-	}
-
-	methodName, isKnownMethod := knownMethods[methodSigData]
-	if !isKnownMethod || !hasJoinAllInOneContract(methodName) {
-		return "", nil, nil, nil, nil, errors.New("not a valid method")
-	}
-
-	method, isAbiMethod := contractABI.Methods[methodName]
-	if !isAbiMethod {
-		return "", nil, nil, nil, nil, errors.New("method not found in ABI")
-	}
-
-	inputsMap := make(map[string]interface{})
-
-	if err = method.Inputs.UnpackIntoMap(inputsMap, decodedData); err != nil {
-		return "", nil, nil, nil, nil, errors.New("can not decode: Unpack Into Map")
-	}
-
-	switch method.Name {
-	case BatchTransferFrom:
-		tokens, ok := inputsMap["_tokens"].([]common.Address)
-		if !ok {
-			return "", nil, nil, nil, nil, errors.New("can not get the token of _tokens")
-		}
-
-		var totalLength = len(tokens)
-
-		fromAddresses, ok := inputsMap["_froms"].([]common.Address)
-		if !ok {
-			return "", nil, nil, nil, nil, errors.New("can not get the address of _froms")
-		}
-
-		amounts, ok := inputsMap["_amounts"].([]*big.Int)
-		if !ok {
-			return "", nil, nil, nil, nil, errors.New("can not get the amount of _amounts")
-		}
-
-		toAddresses := make([]common.Address, totalLength)
-		for i := range toAddresses {
-			toAddresses[i] = common.HexToAddress(toAddress)
-		}
-
-		return method.Name, fromAddresses, toAddresses, tokens, amounts, nil
-	case Collect:
-		tokens, ok := inputsMap["_tokens"].([]common.Address)
-		if !ok {
-			return "", nil, nil, nil, nil, errors.New("can not get the token of _tokens")
-		}
-
-		var totalLength = len(tokens)
-
-		to, ok := inputsMap["to"].(common.Address)
-		if !ok {
-			return "", nil, nil, nil, nil, errors.New("can not get the toAddress of to")
-		}
-
-		amounts, ok := inputsMap["_amounts"].([]*big.Int)
-		if !ok {
-			return "", nil, nil, nil, nil, errors.New("can not get the amount of _amounts")
-		}
-
-		fromAddresses := make([]common.Address, totalLength)
-		toAddresses := make([]common.Address, totalLength)
-		for i := range fromAddresses {
-			fromAddresses[i] = common.HexToAddress(toAddress)
-			toAddresses[i] = to
-		}
-
-		return method.Name, fromAddresses, toAddresses, tokens, amounts, nil
-	case SenderTransferFrom:
-		tokens, ok := inputsMap["_tokens"].([]common.Address)
-		if !ok {
-			return "", nil, nil, nil, nil, errors.New("can not get the token of _tokens")
-		}
-
-		var totalLength = len(tokens)
-
-		amounts, ok := inputsMap["_amounts"].([]*big.Int)
-		if !ok {
-			return "", nil, nil, nil, nil, errors.New("can not get the amount of _amounts")
-		}
-
-		fromAddresses := make([]common.Address, totalLength)
-		toAddresses := make([]common.Address, totalLength)
-		for i := range fromAddresses {
-			fromAddresses[i] = common.HexToAddress(fromAddress)
-			toAddresses[i] = common.HexToAddress(toAddress)
-		}
-
-		return method.Name, fromAddresses, toAddresses, tokens, amounts, nil
-	case Withdraw:
-		tokens, ok := inputsMap["_tokens"].([]common.Address)
-		if !ok {
-			return "", nil, nil, nil, nil, errors.New("can not get the token of _tokens")
-		}
-
-		var totalLength = len(tokens)
-
-		toAddresses, ok := inputsMap["_tos"].([]common.Address)
-		if !ok {
-			return "", nil, nil, nil, nil, errors.New("can not get the toAddress of _tos")
-		}
-		amounts, ok := inputsMap["_amounts"].([]*big.Int)
-		if !ok {
-			return "", nil, nil, nil, nil, errors.New("can not get the amount of _amounts")
-		}
-
-		fromAddresses := make([]common.Address, totalLength)
-		for i := range fromAddresses {
-			fromAddresses[i] = common.HexToAddress(toAddress)
-		}
-
-		return method.Name, fromAddresses, toAddresses, tokens, amounts, nil
-	}
-
-	return "", nil, nil, nil, nil, errors.New("not found method")
-}
 
 func handleERC20Transaction(chainId int, hash, fromAddress, contractAddress, monitorAddress, data string) bool {
 	methodName, decodeFromAddress, decodeToAddress, _, err := DecodeERC20TransactionInputData(chainId, hash, data)

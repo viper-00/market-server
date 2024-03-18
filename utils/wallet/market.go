@@ -57,7 +57,7 @@ func GenerateEthereumCollectionContract(chainId int, ownerPublicKey string) (con
 func GetGeneralAccountByChainId(chainId int) (string, string, error) {
 	switch chainId {
 	case constant.OP_MAINNET, constant.OP_SEPOLIA, constant.OP_GOERLI:
-		return global.MARKET_CONFIG.GeneralAccount.Op.PrivateKey, global.MARKET_CONFIG.GeneralAccount.Op.PublicKey, nil
+		return global.MARKET_CONFIG.GeneralAccount.OpSepolia.PrivateKey, global.MARKET_CONFIG.GeneralAccount.OpSepolia.PublicKey, nil
 	}
 
 	return "", "", errors.New("not found the account")
@@ -200,12 +200,12 @@ func TransferAssetToReceiveAddress(chainId int, callContractAddress string, send
 	}
 
 	tokenAddresses := []string{contractAddress}
-	sendToAddresses := []string{global.MARKET_CONFIG.GeneralAccount.Op.ReceiveAccount}
+	sendToAddresses := []string{global.MARKET_CONFIG.GeneralAccount.OpSepolia.ReceiveAccount}
 	sendValues := []big.Int{*big.NewInt(utils.FormatToOriginalValue(sendVal, decimals))}
 
 	var gasLimit uint64 = 100000
 
-	hash, err = CallWithdrawByCollectionContract(rpc, global.MARKET_CONFIG.GeneralAccount.Op.PrivateKey, global.MARKET_CONFIG.GeneralAccount.Op.PublicKey, callContractAddress, tokenAddresses, sendToAddresses, sendValues, gasLimit)
+	hash, err = CallWithdrawByCollectionContract(rpc, global.MARKET_CONFIG.GeneralAccount.OpSepolia.PrivateKey, global.MARKET_CONFIG.GeneralAccount.OpSepolia.PublicKey, callContractAddress, tokenAddresses, sendToAddresses, sendValues, gasLimit)
 	if err != nil {
 		return "", err
 	}
@@ -227,7 +227,7 @@ func TransferAssetToMoreReceiveAddres(chainId int, tokenAddresses, sendToAddress
 
 	var gasLimit uint64 = 200000
 
-	hash, err = CallWithdrawByCollectionContract(rpc, global.MARKET_CONFIG.GeneralAccount.Op.PrivateKey, global.MARKET_CONFIG.GeneralAccount.Op.PublicKey, global.MARKET_CONFIG.GeneralAccount.Op.ReceiveAccount, tokenAddresses, sendToAddresses, sendValues, gasLimit)
+	hash, err = CallWithdrawByCollectionContract(rpc, global.MARKET_CONFIG.GeneralAccount.OpSepolia.PrivateKey, global.MARKET_CONFIG.GeneralAccount.OpSepolia.PublicKey, global.MARKET_CONFIG.GeneralAccount.OpSepolia.ReceiveAccount, tokenAddresses, sendToAddresses, sendValues, gasLimit)
 	if err != nil {
 		return "", err
 	}

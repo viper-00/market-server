@@ -1,44 +1,48 @@
 system:
-  env: debug # debug | release | test
-  addr: 0000
+  env: release # debug | release | test
+  addr: 
   db-type: mysql
   use-redis: true
   use-init: true
-  use-task: true
-  iplimit-count: 15000
-  iplimit-time: 3600
+  use-task: false
+  iplimit-count: 0
+  iplimit-time: 0
   router-prefix: "api"
 
-blockchain:
-  open-sweep-block: true
-  sweep-mainnet: true
-  ethereum: true
-  bitcoin: true
-  tron: true
-  bsc: true
-  litecoin: true
-  op: false
-  arbitrum-one: false
-  arbitrum-nova: false
+mysql:
+  prefix:
+  singular: false
+  path: 127.0.0.1
+  port: 3306
+  config: charset=utf8mb4&parseTime=True
+  db-name: 
+  username: 
+  password: 
+  max-idle-conns: 10
+  max-open-conns: 100
+  log-mode: error
+  log-zap: false
+  engine: 
 
-blockchain-plugin:
-  bitcoin: "tatum" # tatum | mempool
-  litecoin: "tatum" # tatum | mempool
+redis:
+  db: 0
+  addr: 127.0.0.1:6379
+  password: ""
 
-telegram:
-  allinone-inform-bot-link: 
-  allinone-inform-bot-token: 
-  allinone-inform-channel-id: 
-  allinone-notification-bot-link: 
-  allinone-notification-bot-token: 
-  allinone-notification-bot-id: 
-
-allinone:
-  verify-inform-key-header: "x-server-token"
-  verify-inform-key-token: 
+client:
+  url: 
 
 wss:
-  sec-wss-token: 
+  sec-wss-token:
+
+general-account:
+  op-sepolia:
+    private-key: 
+    public-key: 
+    receive-account: 
+
+coingecko:
+  api-key: 
 
 zap:
   level: info
@@ -51,36 +55,40 @@ zap:
   log-in-console: true
   max-age: 0
 
-redis:
-  db: 
-  addr: 
-  password: ""
-
-mysql:
-  prefix:
-  singular: false
-  path: 
-  port: 
-  config: charset=utf8mb4&parseTime=True
-  db-name: 
-  username: 
-  password: 
-  max-idle-conns: 10
-  max-open-conns: 100
-  log-mode: error
-  log-zap: false
-  engine:
+file:
+  image-url: 
+  image-client-path: "images"
+  image-server-path: "resource/images"
+  file-url: 
+  file-client-path: "files"
+  file-server-path: "resource/files"
 
 smtp:
-  host:
-  port:
-  username:
-  password:
+  host: 
+  port: 
+  username: 
+  password: 
 
-client:
-  url: 
+blockchain:
+  open-sweep-block: false
+  sweep-mainnet: false
+  ethereum: false
+  bitcoin: false
+  tron: false
+  bsc: false
+  litecoin: false
+  op: true
+  arbitrum-one: false
+  arbitrum-nova: false
 
-general-account:
-  op:
-    private-key: 
-    public-key: 
+blockchain-plugin:
+  bitcoin: 
+  litecoin: 
+
+telegram:
+  inform-bot-link:
+  inform-bot-token:
+  inform-channel-id:
+  notification-bot-link:
+  notification-bot-token:
+  notification-bot-id:

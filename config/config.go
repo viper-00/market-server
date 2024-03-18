@@ -8,74 +8,18 @@ import (
 
 type Server struct {
 	System           System           `mapstructure:"system" json:"system" yaml:"system"`
-	Redis            Redis            `mapstructure:"redis" json:"redis" yaml:"redis"`
 	Mysql            Mysql            `mapstructure:"mysql" json:"mysql" yaml:"mysql"`
+	Redis            Redis            `mapstructure:"redis" json:"redis" yaml:"redis"`
+	Client           Client           `mapstructure:"client" json:"client" yaml:"client"`
+	Wss              Wss              `mapstructure:"wss" json:"wss" yaml:"wss"`
+	GeneralAccount   GeneralAccount   `mapstructure:"general-account" json:"general-account" yaml:"general-account"`
+	Coingecko        Coingecko        `mapstructure:"coingecko" json:"coingecko" yaml:"coingecko"`
 	Zap              Zap              `mapstructure:"zap" json:"zap" yaml:"zap"`
+	File             File             `mapstructure:"file" json:"file" yaml:"file"`
+	Smtp             Smtp             `mapstructure:"smtp" json:"smtp" yaml:"smtp"`
 	Blockchain       Blockchain       `mapstructure:"blockchain" json:"blockchain" yaml:"blockchain"`
 	BlockchainPlugin BlockchainPlugin `mapstructure:"blockchain-plugin" json:"blockchain-plugin" yaml:"blockchain-plugin"`
 	Telegram         Telegram         `mapstructure:"telegram" json:"telegram" yaml:"telegram"`
-	Wss              Wss              `mapstructure:"wss" json:"wss" yaml:"wss"`
-	Smtp             Smtp             `mapstructure:"smtp" json:"smtp" yaml:"smtp"`
-	Client           Client           `mapstructure:"client" json:"client" yaml:"client"`
-	GeneralAccount   GeneralAccount   `mapstructure:"general-account" json:"general-account" yaml:"general-account"`
-	Coingecko        Coingecko        `mapstructure:"coingecko" json:"coingecko" yaml:"coingecko"`
-	File             File             `mapstructure:"file" json:"file" yaml:"file"`
-}
-
-type Coingecko struct {
-	ApiKey string `mapstructure:"api-key" json:"api-key" yaml:"api-key"`
-}
-
-type GeneralAccount struct {
-	Op Op `mapstructure:"op" json:"op" yaml:"op"`
-}
-
-type Op struct {
-	PrivateKey     string `mapstructure:"private-key" json:"private-key" yaml:"private-key"`
-	PublicKey      string `mapstructure:"public-key" json:"public-key" yaml:"public-key"`
-	ReceiveAccount string `mapstructure:"receive-account" json:"receive-account" yaml:"receive-account"`
-}
-
-type Client struct {
-	Url string `mapstructure:"url" json:"url" yaml:"url"`
-}
-
-type Smtp struct {
-	Host     string `mapstructure:"host" json:"host" yaml:"host"`
-	Port     int    `mapstructure:"port" json:"port" yaml:"port"`
-	Username string `mapstructure:"username" json:"username" yaml:"username"`
-	Password string `mapstructure:"password" json:"password" yaml:"password"`
-}
-
-type Telegram struct {
-	AllInOneInformBotLink        string `mapstructure:"allinone-inform-bot-link" json:"allinone-inform-bot-link" yaml:"allinone-inform-bot-link"`
-	AllInOneInformBotToken       string `mapstructure:"allinone-inform-bot-token" json:"allinone-inform-bot-token" yaml:"allinone-inform-bot-token"`
-	AllInOneInformChannelId      int64  `mapstructure:"allinone-inform-channel-id" json:"allinone-inform-channel-id" yaml:"allinone-inform-channel-id"`
-	AllInOneNotificationBotLink  string `mapstructure:"allinone-notification-bot-link" json:"allinone-notification-bot-link" yaml:"allinone-notification-bot-link"`
-	AllInOneNotificationBotToken string `mapstructure:"allinone-notification-bot-token" json:"allinone-notification-bot-token" yaml:"allinone-notification-bot-token"`
-	AllInOneNotificationBotId    int64  `mapstructure:"allinone-notification-bot-id" json:"allinone-notification-bot-id" yaml:"allinone-notification-bot-id"`
-}
-
-type Wss struct {
-	SecWssToken string `mapstructure:"sec-wss-token" json:"sec-wss-token" yaml:"sec-wss-token"`
-}
-
-type Blockchain struct {
-	OpenSweepBlock bool `mapstructure:"open-sweep-block" json:"open-sweep-block" yaml:"open-sweep-block"`
-	SweepMainnet   bool `mapstructure:"sweep-mainnet" json:"sweep-mainnet" yaml:"sweep-mainnet"`
-	Ethereum       bool `mapstructure:"ethereum" json:"ethereum" yaml:"ethereum"`
-	Bitcoin        bool `mapstructure:"bitcoin" json:"bitcoin" yaml:"bitcoin"`
-	Tron           bool `mapstructure:"tron" json:"tron" yaml:"tron"`
-	Bsc            bool `mapstructure:"bsc" json:"bsc" yaml:"bsc"`
-	Litecoin       bool `mapstructure:"litecoin" json:"litecoin" yaml:"litecoin"`
-	Op             bool `mapstructure:"op" json:"op" yaml:"op"`
-	ArbitrumOne    bool `mapstructure:"arbitrum-one" json:"arbitrum-one" yaml:"arbitrum-one"`
-	ArbitrumNova   bool `mapstructure:"arbitrum-nova" json:"arbitrum-nova" yaml:"arbitrum-nova"`
-}
-
-type BlockchainPlugin struct {
-	Bitcoin  string `mapstructure:"bitcoin" json:"bitcoin" yaml:"bitcoin"`
-	Litecoin string `mapstructure:"litecoin" json:"litecoin" yaml:"litecoin"`
 }
 
 type System struct {
@@ -90,19 +34,16 @@ type System struct {
 	UseTask      bool   `mapstructure:"use-task" json:"use-task" yaml:"use-task"`
 }
 
-type File struct {
-	ImageUrl        string `mapstructure:"image-url" json:"image-url" yaml:"image-url"`
-	ImageClientPath string `mapstructure:"image-client-path" json:"image-client-path" yaml:"image-client-path"`
-	ImageServerPath string `mapstructure:"image-server-path" json:"image-server-path" yaml:"image-server-path"`
-	FileUrl         string `mapstructure:"file-url" json:"file-url" yaml:"file-url"`
-	FileClientPath  string `mapstructure:"file-client-path" json:"file-client-path" yaml:"file-client-path"`
-	FileServerPath  string `mapstructure:"file-server-path" json:"file-server-path" yaml:"file-server-path"`
+type Mysql struct {
+	GeneralDB `yaml:",inline" mapstructure:",squash"`
 }
 
-type Redis struct {
-	Addr     string `mapstructure:"addr" json:"addr" yaml:"addr"`
-	Password string `mapstructure:"password" json:"password" yaml:"password"`
-	DB       int    `mapstructure:"db" json:"db" yaml:"db"`
+func (m *Mysql) Dsn() string {
+	return m.Username + ":" + m.Password + "@tcp(" + m.Path + ":" + m.Port + ")/" + m.Dbname + "?" + m.Config
+}
+
+func (m *Mysql) GetLogMode() string {
+	return m.LogMode
 }
 
 type GeneralDB struct {
@@ -121,16 +62,32 @@ type GeneralDB struct {
 	LogZap       bool   `mapstructure:"log-zap" json:"log-zap" yaml:"log-zap"`
 }
 
-type Mysql struct {
-	GeneralDB `yaml:",inline" mapstructure:",squash"`
+type Redis struct {
+	Addr     string `mapstructure:"addr" json:"addr" yaml:"addr"`
+	Password string `mapstructure:"password" json:"password" yaml:"password"`
+	DB       int    `mapstructure:"db" json:"db" yaml:"db"`
 }
 
-func (m *Mysql) Dsn() string {
-	return m.Username + ":" + m.Password + "@tcp(" + m.Path + ":" + m.Port + ")/" + m.Dbname + "?" + m.Config
+type Client struct {
+	Url string `mapstructure:"url" json:"url" yaml:"url"`
 }
 
-func (m *Mysql) GetLogMode() string {
-	return m.LogMode
+type Wss struct {
+	SecWssToken string `mapstructure:"sec-wss-token" json:"sec-wss-token" yaml:"sec-wss-token"`
+}
+
+type GeneralAccount struct {
+	OpSepolia OpSepolia `mapstructure:"op-sepolia" json:"op-sepolia" yaml:"op-sepolia"`
+}
+
+type OpSepolia struct {
+	PrivateKey     string `mapstructure:"private-key" json:"private-key" yaml:"private-key"`
+	PublicKey      string `mapstructure:"public-key" json:"public-key" yaml:"public-key"`
+	ReceiveAccount string `mapstructure:"receive-account" json:"receive-account" yaml:"receive-account"`
+}
+
+type Coingecko struct {
+	ApiKey string `mapstructure:"api-key" json:"api-key" yaml:"api-key"`
 }
 
 type Zap struct {
@@ -180,4 +137,47 @@ func (z *Zap) TransportLevel() zapcore.Level {
 	default:
 		return zapcore.DebugLevel
 	}
+}
+
+type File struct {
+	ImageUrl        string `mapstructure:"image-url" json:"image-url" yaml:"image-url"`
+	ImageClientPath string `mapstructure:"image-client-path" json:"image-client-path" yaml:"image-client-path"`
+	ImageServerPath string `mapstructure:"image-server-path" json:"image-server-path" yaml:"image-server-path"`
+	FileUrl         string `mapstructure:"file-url" json:"file-url" yaml:"file-url"`
+	FileClientPath  string `mapstructure:"file-client-path" json:"file-client-path" yaml:"file-client-path"`
+	FileServerPath  string `mapstructure:"file-server-path" json:"file-server-path" yaml:"file-server-path"`
+}
+
+type Smtp struct {
+	Host     string `mapstructure:"host" json:"host" yaml:"host"`
+	Port     int    `mapstructure:"port" json:"port" yaml:"port"`
+	Username string `mapstructure:"username" json:"username" yaml:"username"`
+	Password string `mapstructure:"password" json:"password" yaml:"password"`
+}
+
+type Blockchain struct {
+	OpenSweepBlock bool `mapstructure:"open-sweep-block" json:"open-sweep-block" yaml:"open-sweep-block"`
+	SweepMainnet   bool `mapstructure:"sweep-mainnet" json:"sweep-mainnet" yaml:"sweep-mainnet"`
+	Ethereum       bool `mapstructure:"ethereum" json:"ethereum" yaml:"ethereum"`
+	Bitcoin        bool `mapstructure:"bitcoin" json:"bitcoin" yaml:"bitcoin"`
+	Tron           bool `mapstructure:"tron" json:"tron" yaml:"tron"`
+	Bsc            bool `mapstructure:"bsc" json:"bsc" yaml:"bsc"`
+	Litecoin       bool `mapstructure:"litecoin" json:"litecoin" yaml:"litecoin"`
+	Op             bool `mapstructure:"op" json:"op" yaml:"op"`
+	ArbitrumOne    bool `mapstructure:"arbitrum-one" json:"arbitrum-one" yaml:"arbitrum-one"`
+	ArbitrumNova   bool `mapstructure:"arbitrum-nova" json:"arbitrum-nova" yaml:"arbitrum-nova"`
+}
+
+type BlockchainPlugin struct {
+	Bitcoin  string `mapstructure:"bitcoin" json:"bitcoin" yaml:"bitcoin"`
+	Litecoin string `mapstructure:"litecoin" json:"litecoin" yaml:"litecoin"`
+}
+
+type Telegram struct {
+	InformBotLink        string `mapstructure:"inform-bot-link" json:"inform-bot-link" yaml:"inform-bot-link"`
+	InformBotToken       string `mapstructure:"inform-bot-token" json:"inform-bot-token" yaml:"inform-bot-token"`
+	InformChannelId      int64  `mapstructure:"inform-channel-id" json:"inform-channel-id" yaml:"inform-channel-id"`
+	NotificationBotLink  string `mapstructure:"notification-bot-link" json:"notification-bot-link" yaml:"notification-bot-link"`
+	NotificationBotToken string `mapstructure:"notification-bot-token" json:"notification-bot-token" yaml:"notification-bot-token"`
+	NotificationBotId    int64  `mapstructure:"notification-bot-id" json:"notification-bot-id" yaml:"notification-bot-id"`
 }

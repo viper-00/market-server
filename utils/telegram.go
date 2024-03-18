@@ -12,7 +12,7 @@ func InformToTelegram(message string) bool {
 	defer HandlePanic()
 
 	botSetting := telebot.Settings{
-		Token: global.MARKET_CONFIG.Telegram.AllInOneInformBotToken,
+		Token: global.MARKET_CONFIG.Telegram.InformBotToken,
 	}
 
 	bot, err := telebot.NewBot(botSetting)
@@ -21,7 +21,7 @@ func InformToTelegram(message string) bool {
 		return false
 	}
 
-	_, err = bot.Send(&telebot.Chat{ID: global.MARKET_CONFIG.Telegram.AllInOneInformChannelId}, message)
+	_, err = bot.Send(&telebot.Chat{ID: global.MARKET_CONFIG.Telegram.InformChannelId}, message)
 	if err != nil {
 		global.MARKET_LOG.Info(err.Error())
 		return false

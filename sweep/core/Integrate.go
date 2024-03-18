@@ -245,8 +245,6 @@ func SweepBlockchainTransactionDetails(
 		_, contractName, _, _ := sweepUtils.GetContractInfoByChainIdAndContractAddress(chainId, rpcDetail.Result.To)
 
 		switch contractName {
-		// case constant.ALLINONE:
-		// handleAllInOne(chainId, publicKey, notifyRequest, rpcDetail)
 		default:
 			handleERC20(chainId, publicKey, notifyRequest, rpcDetail)
 		}
@@ -257,60 +255,6 @@ func SweepBlockchainTransactionDetails(
 		global.MARKET_LOG.Error(fmt.Sprintf("%s -> %s", constant.GetChainName(chainId), err.Error()))
 		return
 	}
-}
-
-func handleAllInOne(chainId int, publicKey *[]string, notifyRequest request.NotificationRequest, rpcDetail response.RPCTransactionDetail) (err error) {
-	_, fromAddresses, toAddresses, tokens, amounts, err := erc20.DecodeAllInOneTransactionInputData(chainId, rpcDetail.Result.Hash, rpcDetail.Result.From, rpcDetail.Result.To, rpcDetail.Result.Input)
-	if err != nil {
-		global.MARKET_LOG.Error(fmt.Sprintf("%s -> %s", constant.GetChainName(chainId), err.Error()))
-		return
-	}
-
-	var totalLen = len(fromAddresses)
-
-	for i := 0; i < totalLen; i++ {
-		for _, v := range *publicKey {
-			if utils.HexToAddress(fromAddresses[i].String()) == utils.HexToAddress(v) {
-				isSupportContract, contractName, _, decimals := sweepUtils.GetContractInfoByChainIdAndContractAddress(chainId, tokens[i].String())
-				if !isSupportContract {
-					continue
-				}
-				notifyRequest.Token = contractName
-				notifyRequest.Amount = utils.CalculateBalance(amounts[i], decimals)
-				notifyRequest.TransactType = "send"
-				notifyRequest.Address = v
-				notifyRequest.FromAddress = v
-				notifyRequest.ToAddress = toAddresses[i].String()
-
-				err = notification.NotificationRequest(notifyRequest)
-				if err != nil {
-					global.MARKET_LOG.Error(fmt.Sprintf("%s -> %s", constant.GetChainName(chainId), err.Error()))
-					// return
-				}
-			}
-
-			if utils.HexToAddress(toAddresses[i].String()) == utils.HexToAddress(v) {
-				isSupportContract, contractName, _, decimals := sweepUtils.GetContractInfoByChainIdAndContractAddress(chainId, tokens[i].String())
-				if !isSupportContract {
-					continue
-				}
-				notifyRequest.Token = contractName
-				notifyRequest.Amount = utils.CalculateBalance(amounts[i], decimals)
-				notifyRequest.TransactType = "receive"
-				notifyRequest.Address = v
-				notifyRequest.FromAddress = fromAddresses[i].String()
-				notifyRequest.ToAddress = v
-
-				err = notification.NotificationRequest(notifyRequest)
-				if err != nil {
-					global.MARKET_LOG.Error(fmt.Sprintf("%s -> %s", constant.GetChainName(chainId), err.Error()))
-					// return
-				}
-			}
-
-		}
-	}
-	return nil
 }
 
 func handleERC20(chainId int, publicKey *[]string, notifyRequest request.NotificationRequest, rpcDetail response.RPCTransactionDetail) {
