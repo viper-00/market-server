@@ -165,3 +165,91 @@ func GetTransactionByHash(rpc, hash string) (tx *types.Transaction, isPending bo
 
 	return transaction, isPending, nil
 }
+
+// nonce
+func GetNonce(rpc, fromAddress string) (nonce uint64, err error) {
+	client, err := ethclient.Dial(rpc)
+	if err != nil {
+		return
+	}
+	defer client.Close()
+
+	nonce, err = client.PendingNonceAt(context.Background(), common.HexToAddress(fromAddress))
+	if err != nil {
+		return
+	}
+
+	return nonce, nil
+}
+
+// eth_gasPrice
+func GetGasPrice(rpc string) (gasPrice *big.Int, err error) {
+	client, err := ethclient.Dial(rpc)
+	if err != nil {
+		return
+	}
+	defer client.Close()
+
+	gasPrice, err = client.SuggestGasPrice(context.Background())
+	if err != nil {
+		return
+	}
+
+	return gasPrice, nil
+}
+
+// eth_maxPriorityFeePerGas
+func GetGasTipCap(rpc string) (gasTipCap *big.Int, err error) {
+	client, err := ethclient.Dial(rpc)
+	if err != nil {
+		return
+	}
+	defer client.Close()
+
+	gasTipCap, err = client.SuggestGasTipCap(context.Background())
+	if err != nil {
+		return
+	}
+
+	return gasTipCap, nil
+}
+
+// chainId
+func GetChainId(rpc string) (chainId *big.Int, err error) {
+	client, err := ethclient.Dial(rpc)
+	if err != nil {
+		return
+	}
+	defer client.Close()
+
+	chainId, err = client.NetworkID(context.Background())
+
+	if err != nil {
+		return
+	}
+
+	return chainId, nil
+}
+
+func EstimateGas(rpc, fromAddress, toAddress string, value *big.Int, data []byte) (gas uint64, err error) {
+	client, err := ethclient.Dial(rpc)
+	if err != nil {
+		return
+	}
+	defer client.Close()
+
+	toAddressHex := common.HexToAddress(toAddress)
+
+	gas, err = client.EstimateGas(context.Background(), ethereum.CallMsg{
+		From:  common.HexToAddress(fromAddress),
+		To:    &toAddressHex,
+		Value: value,
+		Data:  data,
+	})
+
+	if err != nil {
+		return
+	}
+
+	return gas, nil
+}

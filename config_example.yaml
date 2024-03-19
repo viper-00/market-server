@@ -68,6 +68,7 @@ smtp:
   port: 
   username: 
   password: 
+  from: 
 
 blockchain:
   open-sweep-block: false
