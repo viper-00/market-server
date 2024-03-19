@@ -27,7 +27,7 @@ func (e *emailAuth) Next(fromServer []byte, more bool) (toServer []byte, err err
 		case "Password:":
 			return []byte(e.password), nil
 		default:
-			return nil, errors.New("Unkown fromServer")
+			return nil, errors.New("unkown fromServer")
 		}
 	}
 	return nil, nil
