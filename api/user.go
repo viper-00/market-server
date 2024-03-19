@@ -70,7 +70,31 @@ func (n *MarketApi) Login(c *gin.Context) {
 		return
 	}
 
-	result, err := service.MarketService.UserLogin(user)
+	err = service.MarketService.UserLogin(user)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		res = common.FailWithMessage(err.Error())
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
+	res = common.OkWithMessage("execution succeed")
+	c.JSON(http.StatusOK, res)
+}
+
+func (n *MarketApi) LoginByCode(c *gin.Context) {
+	var res common.Response
+	var user request.UserLogin
+
+	err := c.ShouldBind(&user)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		res = common.FailWithMessage(err.Error())
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
+	result, err := service.MarketService.UserLoginByCode(user)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage(err.Error())

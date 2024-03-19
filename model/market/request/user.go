@@ -14,6 +14,7 @@ type UserLogin struct {
 	Email   string `json:"email" form:"email"`
 	Address string `json:"address" form:"address"`
 	ChainId int    `json:"chain_id" form:"chain_id"`
+	Code    string `json:"code" form:"code"`
 }
 
 type UpdateUserSetting struct {

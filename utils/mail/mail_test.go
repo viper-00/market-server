@@ -14,8 +14,8 @@ func TestMail(t *testing.T) {
 			"\r\n" +
 			"<html><body>" +
 			"<h1>Predictmarket</h1>" +
-			"<p>Click the button below to log in to Predictmarket.</p>" +
-			"<p>This button will expire in 20 minutes.</p>" +
+			"<p>Click the link below to log in to Predictmarket.</p>" +
+			"<p>This link will expire in 20 minutes.</p>" +
 			"<p><a href=\"" + "sdfsdf" + "\">Log in to Predictmarket</a></p>" +
 			"<p>Confirming this request will securely log you in using " + "zhongmingyang2000@gmail.com" + ".</p>" +
 			"<h2>- Predictmarket Team</h2>" +

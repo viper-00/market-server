@@ -63,7 +63,7 @@ func (m *MService) UserRegister(info request.UserRegister) error {
 				return err
 			}
 
-			if err = mail.SendMail(info.Email, mail.UserLoginTemplate(info.Email, confirmUrl)); err != nil {
+			if err = mail.SendMail(info.Email, mail.UserRegisterTemplate(info.Email, confirmUrl)); err != nil {
 				global.MARKET_LOG.Error(err.Error())
 				return err
 			}
@@ -135,7 +135,63 @@ func (m *MService) UserVerifyInvitation(info request.UserVerifyInvitation) (err 
 	return fmt.Errorf("not found the code: %s", info.Code)
 }
 
-func (n *MService) UserLogin(info request.UserLogin) (user response.User, err error) {
+func (n *MService) UserLoginByCode(info request.UserLogin) (user response.User, err error) {
+	email, err := global.MARKET_REDIS.Get(context.Background(), info.Code).Result()
+	if err != nil {
+		return user, errors.New("not found the code")
+	}
+
+	if email != info.Email {
+		return user, errors.New("permission denied")
+	}
+
+	var modelUser model.User
+	err = global.MARKET_DB.Where("email = ? AND status = 1", info.Email).First(&modelUser).Error
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return
+	}
+
+	var modelUserSetting model.UserSetting
+	err = global.MARKET_DB.Where("user_id = ? AND status = 1", modelUser.ID).First(&modelUserSetting).Error
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return
+	}
+
+	jwtString, jwtErr := jwt.CreateJWT(map[string]interface{}{
+		"chain_id":        modelUser.ChainId,
+		"email":           modelUser.Email,
+		"address":         modelUser.Address,
+		"contractAddress": modelUser.ContractAddress,
+		"time":            time.Now().UTC().UnixMilli(),
+	})
+
+	if jwtErr != nil {
+		global.MARKET_LOG.Error(jwtErr.Error())
+		return
+	}
+
+	user.ChainId = modelUser.ChainId
+	user.Address = modelUser.Address
+	user.ContractAddress = modelUser.ContractAddress
+	user.Email = modelUser.Email
+	user.Auth = fmt.Sprintf("Bearer %s", jwtString)
+	user.InviteCode = modelUser.InvitationCode
+	user.UserName = modelUserSetting.Username
+	user.AvatarUrl = modelUserSetting.AvatarUrl
+	user.Bio = modelUserSetting.Bio
+	user.JoinedDate = modelUser.CreatedAt.UnixMilli()
+
+	if _, err = global.MARKET_REDIS.Set(context.Background(), user.Auth, info.Email, time.Hour*24).Result(); err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return
+	}
+
+	return user, nil
+}
+
+func (n *MService) UserLogin(info request.UserLogin) (err error) {
 	if info.Email != "" {
 		var modelUser model.User
 		err = global.MARKET_DB.Where("email = ? AND status = 1", info.Email).First(&modelUser).Error
@@ -151,42 +207,25 @@ func (n *MService) UserLogin(info request.UserLogin) (user response.User, err er
 			return
 		}
 
-		jwtString, jwtErr := jwt.CreateJWT(map[string]interface{}{
-			"chain_id":        modelUser.ChainId,
-			"email":           modelUser.Email,
-			"address":         modelUser.Address,
-			"contractAddress": modelUser.ContractAddress,
-			"time":            time.Now().UTC().UnixMilli(),
-		})
+		var randomString = utils.GenerateStringRandomly("", 6)
 
-		if jwtErr != nil {
-			global.MARKET_LOG.Error(jwtErr.Error())
-			return
+		if err = mail.SendMail(info.Email, mail.UserLoginTemplate(modelUserSetting.Username, info.Email, randomString)); err != nil {
+			global.MARKET_LOG.Error(err.Error())
+			return err
 		}
 
-		user.ChainId = modelUser.ChainId
-		user.Address = modelUser.Address
-		user.ContractAddress = modelUser.ContractAddress
-		user.Email = modelUser.Email
-		user.Auth = fmt.Sprintf("Bearer %s", jwtString)
-		user.InviteCode = modelUser.InvitationCode
-		user.UserName = modelUserSetting.Username
-		user.AvatarUrl = modelUserSetting.AvatarUrl
-		user.Bio = modelUserSetting.Bio
-		user.JoinedDate = modelUser.CreatedAt.UnixMilli()
-
-		if _, err = global.MARKET_REDIS.Set(context.Background(), user.Auth, info.Email, time.Hour*24).Result(); err != nil {
+		if _, err = global.MARKET_REDIS.Set(context.Background(), randomString, info.Email, time.Minute*10).Result(); err != nil {
 			global.MARKET_LOG.Error(err.Error())
 			return
 		}
 
-		return user, nil
+		return nil
 
 	} else if info.Address != "" && info.ChainId != 0 {
 		// todo:
 	}
 
-	return user, errors.New("no support")
+	return errors.New("no support")
 }
 
 func (m *MService) InitializeAccount(chainId int, email string) (err error) {

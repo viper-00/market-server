@@ -153,7 +153,6 @@ type Smtp struct {
 	Port     int    `mapstructure:"port" json:"port" yaml:"port"`
 	Username string `mapstructure:"username" json:"username" yaml:"username"`
 	Password string `mapstructure:"password" json:"password" yaml:"password"`
-	From     string `mapstructure:"from" json:"from" yaml:"from"`
 }
 
 type Blockchain struct {
