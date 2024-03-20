@@ -56,7 +56,7 @@ func GenerateEthereumWallet() (string, string, error) {
 func CreateNewCollectionContract(rpc, fromPri, fromPub, contractAddress string, bindAddresses []string, gasLimit uint64) (hash string, err error) {
 	var value = big.NewInt(0)
 
-	file, err := os.Open("json/market.json")
+	file, err := os.Open("json/Market.json")
 	if err != nil {
 		return "", err
 	}
@@ -88,7 +88,7 @@ func CreateNewCollectionContract(rpc, fromPri, fromPub, contractAddress string, 
 func CallWithdrawByCollectionContract(rpc, fromPri, fromPub, contractAddress string, tokenAddresses, sendToAddresses []string, sendValues []big.Int, gasLimit uint64) (hash string, err error) {
 	var value = big.NewInt(0)
 
-	file, err := os.Open("json/market.json")
+	file, err := os.Open("json/Market.json")
 	if err != nil {
 		return "", err
 	}
@@ -196,7 +196,7 @@ func CallTokenTransferFrom(rpc, fromPri, fromPub, toAddress, tokenAddress string
 func CallTokenApprove(rpc, fromPri, fromPub, approveAddress, tokenAddress string, approveValue *big.Int, gasLimit uint64) (hash string, err error) {
 	var value = big.NewInt(0)
 
-	file, err := os.Open("./erc20.json")
+	file, err := os.Open("json/ERC20.json")
 	if err != nil {
 		return "", err
 	}
