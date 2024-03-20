@@ -169,7 +169,7 @@ func CallTokenTransfer(rpc, fromPri, fromPub, toAddress, tokenAddress string, to
 func CallTokenTransferFrom(rpc, fromPri, fromPub, toAddress, tokenAddress string, tokenValue *big.Int, gasLimit uint64) (hash string, err error) {
 	var value = big.NewInt(0)
 
-	file, err := os.Open("./erc20.json")
+	file, err := os.Open("json/ERC20.json")
 	if err != nil {
 		return "", err
 	}
