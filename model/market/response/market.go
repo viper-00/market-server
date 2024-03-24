@@ -60,3 +60,25 @@ type EventOrderResponse struct {
 	CreatedTime         int     `json:"created_time"`
 	Hash                string  `json:"hash"`
 }
+
+type EventCommentResponse struct {
+	Username            string `json:"username"`
+	AvatarUrl           string `json:"avatar_url"`
+	Content             string `json:"content"`
+	CommentId           uint   `json:"comment_id"`
+	CreatedTime         int    `json:"created_time"`
+	UserContractAddress string `json:"user_address"`
+	LikeCount           int    `json:"like_count"`
+	OwnLikeStatus       int    `json:"own_like_status"`
+}
+
+type EventForHomeResponse struct {
+	EventLogo        string `json:"event_logo"`
+	Title            string `json:"title"`
+	ExpireTime       int    `json:"expire_time"`
+	UniqueCode       string `json:"unique_code"`
+	Type             string `json:"type"`
+	SettlementTime   int    `json:"settlement_time"`
+	TotalOrderAmount int    `json:"total_order_amount"`
+	CommentCount     int    `json:"comment_count"`
+}

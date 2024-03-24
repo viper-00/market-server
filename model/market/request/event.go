@@ -37,3 +37,7 @@ type SettleMarketOrder struct {
 	EventUniqueCode string `json:"event_unique_code" form:"event_unique_code" binding:"required"`
 	Password        string `json:"password" form:"password" binding:"required"`
 }
+
+type GetMarketEventForHome struct {
+	Type string `json:"type" form:"type" binding:"required"`
+}

@@ -28,6 +28,8 @@ var (
 type EventType string
 
 var (
+	EVENT_ALL      EventType = "All"
+	EVENT_FOR_YOU  EventType = "For You"
 	EVENT_CRYPTO   EventType = "Crypto"
 	EVENT_BUSINESS EventType = "Business"
 	EVENT_SCIENCE  EventType = "Science"

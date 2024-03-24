@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (m *MService) CreateEventComment(c *gin.Context, req request.CreateEventComment) (result interface{}, err error) {
+func (m *MService) CreateEventComment(c *gin.Context, req request.CreateEventComment) (err error) {
 	userModel, err := m.GetUserInfo(c)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
@@ -22,18 +22,30 @@ func (m *MService) CreateEventComment(c *gin.Context, req request.CreateEventCom
 		return
 	}
 
-	var model model.EventComment
-	model.Content = req.Content
-	model.UserId = userModel.ID
-	model.ReplyId = req.ReplyId
-	model.EventId = eventModel.ID
-	err = global.MARKET_DB.Save(&model).Error
+	var saveModel model.EventComment
+
+	if req.ReplyId != 0 {
+		var replyComment model.EventComment
+		err = global.MARKET_DB.Where("id = ? AND status = 1", req.ReplyId).First(&replyComment).Error
+		if err != nil {
+			global.MARKET_LOG.Error(err.Error())
+			return
+		}
+
+		saveModel.ReplyId = replyComment.ID
+	}
+
+	saveModel.Content = req.Content
+	saveModel.UserId = userModel.ID
+	saveModel.EventId = eventModel.ID
+	saveModel.Status = 1
+	err = global.MARKET_DB.Save(&saveModel).Error
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		return
 	}
 
-	return model, nil
+	return nil
 }
 
 func (m *MService) GetEventComment(c *gin.Context, req request.GetEventComment) (result interface{}, err error) {

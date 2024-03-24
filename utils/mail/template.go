@@ -348,8 +348,7 @@ func UserRegisterTemplate(to string, loginUrl string) []byte {
 																					  <p class="last-child">
 																						<em
 																						  ><span style="font-size: 12px"
-																							>@2024 PredictMarket Insights,
-																							Inc.</span
+																							>@2024 PredictMarket Inc.</span
 																						  ></em
 																						>
 																					  </p>
@@ -400,7 +399,7 @@ func UserLoginTemplate(username, to, code string) []byte {
 	msg := []byte(
 		"From: " + global.MARKET_CONFIG.Smtp.Username + "\r\n" +
 			"To: " + to + "\r\n" +
-			"Subject:  to Predictmarket\r\n" +
+			"Subject: Login to Predictmarket\r\n" +
 			"MIME-Version: 1.0\r\n" +
 			"Content-Type: text/html; charset=\"utf-8\"\r\n" +
 			"\r\n" +
@@ -550,7 +549,7 @@ func UserLoginTemplate(username, to, code string) []byte {
 															>
 															  <p style="text-align: left">Hi ` + username + `,</p>
 															  <p style="text-align: left">
-																copy and paste this temporary login code:
+																Copy and paste this temporary login code:
 															  </p>
 															</div>
 														  </td>
@@ -598,7 +597,7 @@ func UserLoginTemplate(username, to, code string) []byte {
 																		font-size: 16px;
 																		font-weight: normal;
 																		font-style: normal;
-																		padding: 16px 28px;
+																		padding: 5px 25px;
 																		text-decoration: none;
 																		min-width: 30px;
 																		text-align: center;
@@ -720,8 +719,7 @@ func UserLoginTemplate(username, to, code string) []byte {
 																					  <p class="last-child">
 																						<em
 																						  ><span style="font-size: 12px"
-																							>@2024 PredictMarket Insights,
-																							Inc.</span
+																							>@2024 PredictMarket Inc.</span
 																						  ></em
 																						>
 																					  </p>

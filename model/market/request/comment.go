@@ -2,7 +2,7 @@ package request
 
 type CreateEventComment struct {
 	Content string `json:"content" form:"content" binding:"required"`
-	ReplyId uint   `json:"reply_id" form:"reply_id" binding:"required"`
+	ReplyId uint   `json:"reply_id" form:"reply_id"`
 	Code    string `json:"code" form:"code" binding:"required"`
 }
 

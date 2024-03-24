@@ -41,6 +41,8 @@ func (mRouter *MarketRouter) InitRouter(Router *gin.RouterGroup) {
 		clientRouter.POST("login-by-code", api.LoginByCode)
 		clientRouter.GET("crypto-price", api.GetCryptoPrice)
 		clientRouter.GET("user-profile", api.GetUserProfile)
+		clientRouter.GET("market-event-type", api.GetMarketEventTypeForHome)
+		clientRouter.GET("market-event", api.GetMarketEventForHome)
 	}
 
 	userRouter := clientRouter.Group("/user")
@@ -81,7 +83,7 @@ func (mRouter *MarketRouter) InitRouter(Router *gin.RouterGroup) {
 		commentRouter.DELETE("market-event-comment", api.RemoveEventComment)
 	}
 
-	likeRouter := eventRouter.Group("/like")
+	likeRouter := commentRouter.Group("/like")
 	likeRouter.Use(middleware.ClientAuth())
 	{
 		likeRouter.POST("market-event-comment-like", api.CreateCommentLike)

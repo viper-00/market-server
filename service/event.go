@@ -20,6 +20,12 @@ func (m *MService) GetMarketEventByUniqueCode(code string) (model model.Event, e
 }
 
 func (m *MService) GetMarketEvent(c *gin.Context, req request.GetMarketEvent) (result interface{}, err error) {
+	loginUser, err := m.GetUserInfo(c)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return
+	}
+
 	var eventModel model.Event
 	err = global.MARKET_DB.Where("unique_website_code = ? AND status = 1", req.Code).First(&eventModel).Error
 	if err != nil {
@@ -113,17 +119,60 @@ func (m *MService) GetMarketEvent(c *gin.Context, req request.GetMarketEvent) (r
 		isSettlement = true
 	}
 
+	var commentResponses []response.EventCommentResponse
 	var eventComments []model.EventComment
-	err = global.MARKET_DB.Where("event_id = ? AND status = 1", eventModel.ID).Find(&eventComments).Error
+	err = global.MARKET_DB.Where("event_id = ? AND status = 1", eventModel.ID).Order("id desc").Find(&eventComments).Error
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		return
 	}
 
+	for _, v := range eventComments {
+		var userSetting model.UserSetting
+		err = global.MARKET_DB.Where("user_id = ? AND status = 1", v.UserId).First(&userSetting).Error
+		if err != nil {
+			global.MARKET_LOG.Error(err.Error())
+			return
+		}
+		var user model.User
+		err = global.MARKET_DB.Where("id = ? AND status = 1", v.UserId).First(&user).Error
+		if err != nil {
+			global.MARKET_LOG.Error(err.Error())
+			return
+		}
+
+		var commentResponse response.EventCommentResponse
+		commentResponse.AvatarUrl = userSetting.AvatarUrl
+		commentResponse.CommentId = v.ID
+		commentResponse.Content = v.Content
+		commentResponse.CreatedTime = int(v.CreatedAt.UnixMilli())
+		commentResponse.Username = userSetting.Username
+		commentResponse.UserContractAddress = user.ContractAddress
+
+		var commentLike []model.EventCommentLike
+		err = global.MARKET_DB.Where("comment_id = ? AND status = 1", v.ID).Find(&commentLike).Error
+		if err != nil {
+			global.MARKET_LOG.Error(err.Error())
+			return
+		}
+
+		commentResponse.OwnLikeStatus = 2
+		for _, c := range commentLike {
+			if c.IsLike == 1 {
+				commentResponse.LikeCount += 1
+
+				if commentResponse.OwnLikeStatus != 1 && loginUser.ID == c.UserId {
+					commentResponse.OwnLikeStatus = 1
+				}
+			}
+		}
+		commentResponses = append(commentResponses, commentResponse)
+	}
+
 	return map[string]interface{}{
 		"event":         eventModel,
 		"play":          eventPlayResponse,
-		"comment":       eventComments,
+		"comment":       commentResponses,
 		"is_settlement": isSettlement,
 	}, nil
 }

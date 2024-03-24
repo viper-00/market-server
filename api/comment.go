@@ -22,7 +22,7 @@ func (n *MarketApi) CreateEventComment(c *gin.Context) {
 		return
 	}
 
-	result, err := service.MarketService.CreateEventComment(c, comment)
+	err = service.MarketService.CreateEventComment(c, comment)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		res = common.FailWithMessage(err.Error())
@@ -30,7 +30,7 @@ func (n *MarketApi) CreateEventComment(c *gin.Context) {
 		return
 	}
 
-	res = common.OKWithData(result)
+	res = common.OkWithMessage("execution succeed")
 	c.JSON(http.StatusOK, res)
 }
 
