@@ -23,7 +23,6 @@ func (m *MService) GetMarketEvent(c *gin.Context, req request.GetMarketEvent) (r
 	loginUser, err := m.GetUserInfo(c)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
-		return
 	}
 
 	var eventModel model.Event
@@ -161,6 +160,9 @@ func (m *MService) GetMarketEvent(c *gin.Context, req request.GetMarketEvent) (r
 			if c.IsLike == 1 {
 				commentResponse.LikeCount += 1
 
+				if loginUser.ID == 0 {
+					continue
+				}
 				if commentResponse.OwnLikeStatus != 1 && loginUser.ID == c.UserId {
 					commentResponse.OwnLikeStatus = 1
 				}

@@ -42,7 +42,8 @@ func (mRouter *MarketRouter) InitRouter(Router *gin.RouterGroup) {
 		clientRouter.GET("crypto-price", api.GetCryptoPrice)
 		clientRouter.GET("user-profile", api.GetUserProfile)
 		clientRouter.GET("market-event-type", api.GetMarketEventTypeForHome)
-		clientRouter.GET("market-event", api.GetMarketEventForHome)
+		clientRouter.GET("market-event-list", api.GetMarketEventForHome)
+		clientRouter.GET("market-event", api.GetMarketEvent)
 	}
 
 	userRouter := clientRouter.Group("/user")
@@ -59,7 +60,6 @@ func (mRouter *MarketRouter) InitRouter(Router *gin.RouterGroup) {
 	eventRouter := clientRouter.Group("/event")
 	eventRouter.Use(middleware.ClientAuth())
 	{
-		eventRouter.GET("market-event", api.GetMarketEvent)
 		eventRouter.POST("market-event", api.CreateMarketEvent)
 		eventRouter.PUT("market-event", api.UpdateMarketEvent)
 		eventRouter.POST("market-event-play", api.CreateMarketEventPlay)
