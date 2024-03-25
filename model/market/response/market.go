@@ -73,12 +73,12 @@ type EventCommentResponse struct {
 }
 
 type EventForHomeResponse struct {
-	EventLogo        string `json:"event_logo"`
-	Title            string `json:"title"`
-	ExpireTime       int    `json:"expire_time"`
-	UniqueCode       string `json:"unique_code"`
-	Type             string `json:"type"`
-	SettlementTime   int    `json:"settlement_time"`
-	TotalOrderAmount int    `json:"total_order_amount"`
-	CommentCount     int    `json:"comment_count"`
+	EventLogo        string  `json:"event_logo"`
+	Title            string  `json:"title"`
+	ExpireTime       int     `json:"expire_time"`
+	UniqueCode       string  `json:"unique_code"`
+	Type             string  `json:"type"`
+	SettlementTime   int     `json:"settlement_time"`
+	TotalOrderAmount float64 `json:"total_order_amount"`
+	CommentCount     int     `json:"comment_count"`
 }
