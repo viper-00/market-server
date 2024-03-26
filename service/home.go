@@ -1,12 +1,17 @@
 package service
 
 import (
+	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"market/global"
 	"market/global/constant"
 	"market/model"
 	"market/model/market/request"
 	"market/model/market/response"
+	"market/utils/wallet"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -91,6 +96,111 @@ func (m *MService) GetMarketEventForHome(c *gin.Context, req request.GetMarketEv
 
 			result = append(result, r)
 		}
+	}
+
+	return
+}
+
+func (m *MService) GetTopVolumnForHome(c *gin.Context) (results []response.TopVolumnForHomeResponse, err error) {
+	// chainId, _ := c.Get("chainId")
+	// intChainId := int(chainId.(float64))
+
+	var limit = 10
+
+	var users []model.User
+	err = global.MARKET_DB.Where("status = 1").Order("id desc").Limit(limit).Find(&users).Error
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return
+	}
+
+	for _, v := range users {
+		var result response.TopVolumnForHomeResponse
+		result.UserContractAddress = v.ContractAddress
+
+		balance, balanceErr := wallet.GetUsdtTokenBalance(constant.OP_SEPOLIA, v.ContractAddress)
+		if balanceErr != nil {
+			global.MARKET_LOG.Error(balanceErr.Error())
+			return
+		}
+
+		result.CryptoAmount = balance
+
+		cryptoFromRedis, redisErr := global.MARKET_REDIS.Get(context.Background(), constant.CRYPTO_PRICE).Result()
+		if redisErr != nil {
+			global.MARKET_LOG.Error(redisErr.Error())
+			return
+		}
+
+		var cryptoResponse response.CoingeckoPrice
+		unmarshalErr := json.Unmarshal([]byte(cryptoFromRedis), &cryptoResponse)
+		if err != nil {
+			global.MARKET_LOG.Error(unmarshalErr.Error())
+			return
+		}
+
+		balanceFloat64, parseErr := strconv.ParseFloat(balance, 64)
+		if parseErr != nil {
+			global.MARKET_LOG.Error(parseErr.Error())
+			return
+		}
+
+		result.LegalAmount = fmt.Sprintf("%f", cryptoResponse.USDT.USD*balanceFloat64)
+
+		var setting model.UserSetting
+		err = global.MARKET_DB.Where("user_id = ? AND status = 1", v.ID).First(&setting).Error
+		if err != nil {
+			global.MARKET_LOG.Error(err.Error())
+			return
+		}
+
+		result.AvatarUrl = setting.AvatarUrl
+		result.Username = setting.Username
+
+		results = append(results, result)
+	}
+
+	return
+}
+
+func (m *MService) GetRecentActivityForHome(c *gin.Context) (results []response.RecentActivityForHomeResponse, err error) {
+	var limit = 5
+
+	var orders []model.EventOrder
+	err = global.MARKET_DB.Where("status = 1").Order("id desc").Limit(limit).Find(&orders).Error
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		return
+	}
+
+	for _, v := range orders {
+		var result response.RecentActivityForHomeResponse
+		result.Amount = v.Amount
+		result.OrderType = constant.AllOrderTypes[v.OrderType]
+		result.CreatedTime = int(v.CreatedAt.UnixMilli())
+		result.PlayValue = v.PlayValue
+
+		var event model.Event
+		err = global.MARKET_DB.Where("id = ? AND status = 1", v.EventId).First(&event).Error
+		if err != nil {
+			global.MARKET_LOG.Error(err.Error())
+			return
+		}
+
+		result.EventLogo = event.EventLogo
+		result.Title = event.Title
+		result.UniqueCode = event.UniqueWebsiteCode
+
+		var setting model.UserSetting
+		err = global.MARKET_DB.Where("user_id = ? AND status = 1", v.UserId).First(&setting).Error
+		if err != nil {
+			global.MARKET_LOG.Error(err.Error())
+			return
+		}
+		result.Username = setting.Username
+		result.AvatarUrl = setting.AvatarUrl
+
+		results = append(results, result)
 	}
 
 	return

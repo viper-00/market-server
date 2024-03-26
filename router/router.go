@@ -43,6 +43,8 @@ func (mRouter *MarketRouter) InitRouter(Router *gin.RouterGroup) {
 		clientRouter.GET("user-profile", api.GetUserProfile)
 		clientRouter.GET("market-event-type", api.GetMarketEventTypeForHome)
 		clientRouter.GET("market-event-list", api.GetMarketEventForHome)
+		clientRouter.GET("top-volumn", api.GetTopVolumnForHome)
+		clientRouter.GET("recent-activity", api.GetRecentActivityForHome)
 		clientRouter.GET("market-event", api.GetMarketEvent)
 	}
 

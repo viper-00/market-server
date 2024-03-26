@@ -137,6 +137,15 @@ func MonitorTxStatus(chainId int, hash string) (err error) {
 	}
 }
 
+func GetUsdtTokenBalance(chainId int, address string) (balance string, err error) {
+	isSupport, _, contractAddress, decimals := sweepUtils.GetContractInfoByChainIdAndSymbol(chainId, constant.USDT)
+	if !isSupport {
+		return "", errors.New("contract address not found")
+	}
+
+	return GetSingleTokenBalance(chainId, decimals, contractAddress, address)
+}
+
 func GetSingleTokenBalance(chainId, decimals int, contractAddress, address string) (balance string, err error) {
 	rpc := constant.GetRPCUrlByNetwork(chainId)
 	if rpc == "" {

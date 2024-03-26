@@ -82,3 +82,23 @@ type EventForHomeResponse struct {
 	TotalOrderAmount float64 `json:"total_order_amount"`
 	CommentCount     int     `json:"comment_count"`
 }
+
+type TopVolumnForHomeResponse struct {
+	AvatarUrl           string `json:"avatar_url"`
+	Username            string `json:"username"`
+	CryptoAmount        string `json:"crypto_amount"`
+	LegalAmount         string `json:"legal_amount"`
+	UserContractAddress string `json:"user_address"`
+}
+
+type RecentActivityForHomeResponse struct {
+	EventLogo   string  `json:"event_logo"`
+	Title       string  `json:"title"`
+	UniqueCode  string  `json:"unique_code"`
+	CreatedTime int     `json:"created_time"`
+	AvatarUrl   string  `json:"avatar_url"`
+	Amount      float64 `json:"amount"`
+	OrderType   string  `json:"order_type"`
+	Username    string  `json:"username"`
+	PlayValue   string  `json:"play_value"`
+}

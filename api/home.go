@@ -48,3 +48,33 @@ func (n *MarketApi) GetMarketEventForHome(c *gin.Context) {
 	res = common.OKWithData(result)
 	c.JSON(http.StatusOK, res)
 }
+
+func (n *MarketApi) GetTopVolumnForHome(c *gin.Context) {
+	var res common.Response
+
+	result, err := service.MarketService.GetTopVolumnForHome(c)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		res = common.FailWithMessage(err.Error())
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
+	res = common.OKWithData(result)
+	c.JSON(http.StatusOK, res)
+}
+
+func (n *MarketApi) GetRecentActivityForHome(c *gin.Context) {
+	var res common.Response
+
+	result, err := service.MarketService.GetRecentActivityForHome(c)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		res = common.FailWithMessage(err.Error())
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
+	res = common.OKWithData(result)
+	c.JSON(http.StatusOK, res)
+}
