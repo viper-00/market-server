@@ -1,6 +1,9 @@
 package constant
 
 import (
+	"market/model/market/request"
+	"market/model/market/response"
+	"market/utils"
 	"math/rand"
 	"time"
 )
@@ -16,6 +19,13 @@ var (
 
 	ETHMainnetRPC = []string{
 		"https://eth-mainnet.g.alchemy.com/v2/" + getRandomAlchemyKey(true),
+		"https://ethereum-rpc.publicnode.com",
+	}
+
+	ETHInnerTxMainnetRPC = []string{
+		"https://eth.llamarpc.com",
+		"https://eth-pokt.nodies.app",
+		"https://eth.merkle.io",
 	}
 
 	ETHGoerliRPC = []string{
@@ -29,35 +39,45 @@ var (
 		"https://eth-sepolia.g.alchemy.com/v2/" + getRandomAlchemyKey(false),
 	}
 
+	ETHInnerTxSepoliaRPC = []string{
+		// "https://eth-sepolia.g.alchemy.com/v2/" + getRandomInnertxAlchemyKey(false),
+	}
+
 	BSCTestnetRPC = []string{
-		"https://bsc-testnet-dataseed.bnbchain.org",
-		"https://bsc-testnet.bnbchain.org",
-		"https://bsc-prebsc-dataseed.bnbchain.org",
+		"https://data-seed-prebsc-1-s1.binance.org:8545",
+		"https://data-seed-prebsc-2-s1.binance.org:8545",
+		"http://data-seed-prebsc-1-s2.binance.org:8545",
+		"http://data-seed-prebsc-2-s2.binance.org:8545",
+		"https://data-seed-prebsc-1-s3.binance.org:8545",
+		"https://data-seed-prebsc-2-s3.binance.org:8545",
 	}
 
 	BSCMainnetRPC = []string{
-		"https://bsc-dataseed.bnbchain.org",
-		"https://bsc-dataseed.nariox.org",
-		"https://bsc-dataseed.defibit.io",
-		"https://bsc-dataseed.ninicoin.io",
-		"https://bsc.nodereal.io",
-		"https://bsc-dataseed-public.bnbchain.org",
-		"https://bscrpc.com",
+		"https://bsc-dataseed3.binance.org",
+		"https://bsc-dataseed4.binance.org",
+		"https://bsc-dataseed1.defibit.io",
+		"https://bsc-dataseed2.defibit.io",
+		"https://bsc-dataseed3.defibit.io",
+		"https://bsc-dataseed4.defibit.io",
+		"https://bsc-dataseed1.ninicoin.io",
+		"https://bsc-dataseed2.ninicoin.io",
+		"https://bsc-dataseed3.ninicoin.io",
+		"https://bsc-dataseed4.ninicoin.io",
 	}
 
 	OPMainnetRPC = []string{
+		// "https://opt-mainnet.g.alchemy.com/v2/" + getRandomAlchemyKey(true),
 		"https://mainnet.optimism.io",
-		"https://opt-mainnet.g.alchemy.com/v2/" + getRandomAlchemyKey(true),
 	}
 
 	OPGoerliRPC = []string{
 		"https://goerli.optimism.io",
-		"https://opt-goerli.g.alchemy.com/v2/" + getRandomAlchemyKey(false),
+		// "https://opt-goerli.g.alchemy.com/v2/" + getRandomAlchemyKey(false),
 	}
 
 	OPSepoliaRPC = []string{
-		// "https://sepolia.optimism.io",
-		"https://optimism-sepolia.blockpi.network/v1/rpc/public",
+		// "https://opt-sepolia.g.alchemy.com/v2/" + getRandomAlchemyKey(false),
+		"https://sepolia.optimism.io",
 	}
 
 	ArbitrumOneRPC = []string{
@@ -111,46 +131,72 @@ func GetAllRPCUrlByNetwork(id int) []string {
 	return nil
 }
 
+func GetRealRpcByArray(rpcs []string) string {
+	for _, rpc := range rpcs {
+		client.URL = rpc
+		var rpcBlockInfo response.RPCBlockInfo
+		var jsonRpcRequest request.JsonRpcRequest
+		jsonRpcRequest.Id = 1
+		jsonRpcRequest.Jsonrpc = "2.0"
+		jsonRpcRequest.Method = "eth_getBlockByNumber"
+		jsonRpcRequest.Params = []interface{}{"latest", false}
+		err := client.HTTPPost(jsonRpcRequest, &rpcBlockInfo)
+		if err != nil {
+			continue
+		}
+
+		height, err := utils.HexStringToInt64(rpcBlockInfo.Result.Number)
+		if err != nil || !(height > 0) {
+			continue
+		}
+		return rpc
+	}
+	return ""
+}
+
+// get real rpc url
 func GetRPCUrlByNetwork(id int) string {
-	rand.Seed(time.Now().UnixMilli())
+	switch id {
+	case ETH_MAINNET:
+		return GetRealRpcByArray(ETHMainnetRPC)
+	case ETH_GOERLI:
+		return GetRealRpcByArray(ETHGoerliRPC)
+	case ETH_SEPOLIA:
+		return GetRealRpcByArray(ETHSepoliaRPC)
+	case OP_MAINNET:
+		return GetRealRpcByArray(OPMainnetRPC)
+	case OP_GOERLI:
+		return GetRealRpcByArray(OPGoerliRPC)
+	case OP_SEPOLIA:
+		return GetRealRpcByArray(OPSepoliaRPC)
+	case BSC_MAINNET:
+		return GetRealRpcByArray(BSCMainnetRPC)
+	case BSC_TESTNET:
+		return GetRealRpcByArray(BSCTestnetRPC)
+	case ARBITRUM_ONE:
+		return GetRealRpcByArray(ArbitrumOneRPC)
+	case ARBITRUM_NOVA:
+		return GetRealRpcByArray(ArbitrumNovaRPC)
+	case ARBITRUM_GOERLI:
+		return GetRealRpcByArray(ArbitrumGoerliRPC)
+	case ARBITRUM_SEPOLIA:
+		return GetRealRpcByArray(ArbitrumSepoliaRPC)
+	}
+
+	return ""
+}
+
+// get real inner tx(trace_debug) rpc url
+func GetInnerTxRPCUrlByNetwork(id int) string {
+	rand.Seed(time.Now().UnixNano())
 
 	switch id {
 	case ETH_MAINNET:
-		index := rand.Intn(len(ETHMainnetRPC))
-		return ETHMainnetRPC[index]
-	case ETH_GOERLI:
-		index := rand.Intn(len(ETHGoerliRPC))
-		return ETHGoerliRPC[index]
+		index := rand.Intn(len(ETHInnerTxMainnetRPC))
+		return ETHInnerTxMainnetRPC[index]
 	case ETH_SEPOLIA:
-		index := rand.Intn(len(ETHSepoliaRPC))
-		return ETHSepoliaRPC[index]
-	case OP_MAINNET:
-		index := rand.Intn(len(OPMainnetRPC))
-		return OPMainnetRPC[index]
-	case OP_GOERLI:
-		index := rand.Intn(len(OPGoerliRPC))
-		return OPGoerliRPC[index]
-	case OP_SEPOLIA:
-		index := rand.Intn(len(OPSepoliaRPC))
-		return OPSepoliaRPC[index]
-	case BSC_MAINNET:
-		index := rand.Intn(len(BSCMainnetRPC))
-		return BSCMainnetRPC[index]
-	case BSC_TESTNET:
-		index := rand.Intn(len(BSCTestnetRPC))
-		return BSCTestnetRPC[index]
-	case ARBITRUM_ONE:
-		index := rand.Intn(len(ArbitrumOneRPC))
-		return ArbitrumOneRPC[index]
-	case ARBITRUM_NOVA:
-		index := rand.Intn(len(ArbitrumNovaRPC))
-		return ArbitrumNovaRPC[index]
-	case ARBITRUM_GOERLI:
-		index := rand.Intn(len(ArbitrumGoerliRPC))
-		return ArbitrumGoerliRPC[index]
-	case ARBITRUM_SEPOLIA:
-		index := rand.Intn(len(ArbitrumSepoliaRPC))
-		return ArbitrumSepoliaRPC[index]
+		index := rand.Intn(len(ETHInnerTxSepoliaRPC))
+		return ETHInnerTxSepoliaRPC[index]
 	}
 
 	return ""

@@ -28,11 +28,11 @@ func CalculateBalance(transactionValue *big.Int, decimals int) string {
 	return resultString
 }
 
-func HexStringToInt64(hexString string) (int64, error) {
+func HexStringToInt64(hexString string) (uint64, error) {
 	if hexString == "" {
 		return 0, errors.New("hexString can not be empty")
 	}
-	intValue, err := strconv.ParseInt(hexString, 0, 64)
+	intValue, err := strconv.ParseUint(hexString, 0, 64)
 	if err != nil {
 		return 0, err
 	}

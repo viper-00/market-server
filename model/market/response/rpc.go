@@ -93,3 +93,23 @@ type RPCGeneral struct {
 	Id      int    `json:"id"`
 	Result  string `json:"result"`
 }
+
+type CallResult struct {
+	From         string       `json:"from"`
+	Gas          string       `json:"gas"`
+	GasUsed      string       `json:"gasUsed"`
+	Input        string       `json:"input"`
+	Output       string       `json:"output"`
+	To           string       `json:"to"`
+	Type         string       `json:"type"`
+	Value        string       `json:"value"`
+	Error        string       `json:"error"`
+	RevertReason string       `json:"revertReason"`
+	Calls        []CallResult `json:"calls"`
+}
+
+type RPCInnerTxInfo struct {
+	JsonRpc string     `json:"jsonrpc"`
+	Id      int        `json:"id"`
+	Result  CallResult `json:"result"`
+}
