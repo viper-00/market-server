@@ -11,7 +11,7 @@ import (
 )
 
 func (m *MService) GetCryptoPrice(c *gin.Context) (result interface{}, err error) {
-	var price response.CoingeckoPrice
+	var price response.CustomCoingeckoPrice
 
 	data, err := global.MARKET_REDIS.Get(context.Background(), constant.CRYPTO_PRICE).Result()
 	if err != nil {

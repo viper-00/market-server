@@ -248,3 +248,52 @@ func TransferAssetToMoreReceiveAddres(chainId int, tokenAddresses, sendToAddress
 
 	return hash, nil
 }
+
+func TransferEthToReceiveAddress(chainId int, sendToAddress string, sendVal float64) (hash string, err error) {
+	rpc := constant.GetRPCUrlByNetwork(chainId)
+	if rpc == "" {
+		return "", errors.New("chain not support")
+	}
+
+	var gasLimit uint64 = 96000
+	sendValue := big.NewInt(utils.FormatToOriginalValue(sendVal, 18))
+
+	hash, err = CallEthTransfer(rpc, global.MARKET_CONFIG.GeneralAccount.OpSepolia.PrivateKey, global.MARKET_CONFIG.GeneralAccount.OpSepolia.PublicKey, sendToAddress, sendValue, gasLimit)
+	if err != nil {
+		return "", err
+	}
+
+	err = MonitorTxStatus(chainId, hash)
+	if err != nil {
+		return "", err
+	}
+
+	return hash, nil
+}
+
+func TransferTokenToReceiveAddress(chainId int, sendToAddress, coin string, sendVal float64) (hash string, err error) {
+	rpc := constant.GetRPCUrlByNetwork(chainId)
+	if rpc == "" {
+		return "", errors.New("chain not support")
+	}
+
+	isSupport, _, contractAddress, decimals := sweepUtils.GetContractInfoByChainIdAndSymbol(chainId, coin)
+	if !isSupport {
+		return "", errors.New("contract address not found")
+	}
+
+	var gasLimit uint64 = 96000
+	sendValue := big.NewInt(utils.FormatToOriginalValue(sendVal, decimals))
+
+	hash, err = CallTokenTransfer(rpc, global.MARKET_CONFIG.GeneralAccount.OpSepolia.PrivateKey, global.MARKET_CONFIG.GeneralAccount.OpSepolia.PublicKey, sendToAddress, contractAddress, sendValue, gasLimit)
+	if err != nil {
+		return "", err
+	}
+
+	err = MonitorTxStatus(chainId, hash)
+	if err != nil {
+		return "", err
+	}
+
+	return hash, nil
+}

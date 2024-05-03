@@ -422,3 +422,26 @@ func TronValidateContratAddress(chainId int, address string) (bool, string) {
 
 	return false, ""
 }
+
+var (
+	freeChainArray = []int{OP_SEPOLIA}
+	freeCoinArray  = []string{ETH, USDT, USDC}
+)
+
+func IsSupportFreeChain(chainId int) bool {
+	for _, v := range freeChainArray {
+		if v == chainId {
+			return true
+		}
+	}
+	return false
+}
+
+func IsSupportFreeCoin(coin string) bool {
+	for _, v := range freeCoinArray {
+		if v == coin {
+			return true
+		}
+	}
+	return false
+}

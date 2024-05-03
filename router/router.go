@@ -11,7 +11,7 @@ import (
 type MarketRouter struct{}
 
 func (mRouter *MarketRouter) InitRouter(Router *gin.RouterGroup) {
-	internalRouter := Router.Group("/internal")
+	internalRouter := Router.Group("internal")
 	api := new(api.MarketApi)
 	{
 		internalRouter.GET("test", api.Test)
@@ -30,7 +30,7 @@ func (mRouter *MarketRouter) InitRouter(Router *gin.RouterGroup) {
 		internalRouter.GET("ws", api.WsForTxInfo)
 	}
 
-	clientRouter := Router.Group("/client")
+	clientRouter := Router.Group("client")
 	{
 		clientRouter.GET("test", api.Test)
 
@@ -48,7 +48,7 @@ func (mRouter *MarketRouter) InitRouter(Router *gin.RouterGroup) {
 		clientRouter.GET("market-event", api.GetMarketEvent)
 	}
 
-	userRouter := clientRouter.Group("/user")
+	userRouter := clientRouter.Group("user")
 	userRouter.Use(middleware.ClientAuth())
 	{
 		userRouter.GET("user-setting", api.GetUserSetting)
@@ -59,7 +59,7 @@ func (mRouter *MarketRouter) InitRouter(Router *gin.RouterGroup) {
 		userRouter.GET("user-balance", api.GetUserBalance)
 	}
 
-	eventRouter := clientRouter.Group("/event")
+	eventRouter := clientRouter.Group("event")
 	eventRouter.Use(middleware.ClientAuth())
 	{
 		eventRouter.POST("market-event", api.CreateMarketEvent)
@@ -70,14 +70,14 @@ func (mRouter *MarketRouter) InitRouter(Router *gin.RouterGroup) {
 		eventRouter.GET("market-event-type", api.GetMarketEventType)
 	}
 
-	orderRouter := eventRouter.Group("/order")
+	orderRouter := eventRouter.Group("order")
 	orderRouter.Use(middleware.ClientAuth())
 	{
 		orderRouter.POST("market-event-order", api.CreateMarketEventOrder)
 		orderRouter.POST("market-event-order-settle", api.SettleMarketEventOrder)
 	}
 
-	commentRouter := eventRouter.Group("/comment")
+	commentRouter := eventRouter.Group("comment")
 	commentRouter.Use(middleware.ClientAuth())
 	{
 		commentRouter.POST("market-event-comment", api.CreateEventComment)
@@ -85,7 +85,7 @@ func (mRouter *MarketRouter) InitRouter(Router *gin.RouterGroup) {
 		commentRouter.DELETE("market-event-comment", api.RemoveEventComment)
 	}
 
-	likeRouter := commentRouter.Group("/like")
+	likeRouter := commentRouter.Group("like")
 	likeRouter.Use(middleware.ClientAuth())
 	{
 		likeRouter.POST("market-event-comment-like", api.CreateCommentLike)
@@ -96,5 +96,11 @@ func (mRouter *MarketRouter) InitRouter(Router *gin.RouterGroup) {
 	uploadRouter.Use(middleware.ClientAuth())
 	{
 		uploadRouter.POST("uploadFile", api.UploadFile)
+	}
+
+	coinRouter := clientRouter.Group("coin")
+	coinRouter.Use(middleware.ClientAuth())
+	{
+		coinRouter.GET("free", api.GetFreeCoin)
 	}
 }

@@ -44,3 +44,7 @@ type SendMessageToTelegram struct {
 type RevokeTelegramKey struct {
 	AuthKey string `json:"auth_key" form:"auth_key" binding:"required"`
 }
+
+type GetFreeCoin struct {
+	Coin string `json:"coin" form:"coin" binding:"required"`
+}

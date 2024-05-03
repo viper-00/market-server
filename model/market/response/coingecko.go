@@ -13,3 +13,9 @@ type CoingeckoPriceCore struct {
 	USD24hChange  float64 `json:"usd_24h_change"`
 	LastUpdatedAt int     `json:"last_updated_at"`
 }
+
+type CustomCoingeckoPrice struct {
+	ETH  CoingeckoPriceCore `json:"eth"`
+	USDT CoingeckoPriceCore `json:"usdt"`
+	USDC CoingeckoPriceCore `json:"usdc"`
+}

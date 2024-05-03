@@ -47,7 +47,12 @@ func RunCoingeckoCore() {
 		return
 	}
 
-	cryptoByte, err := json.Marshal(cryptoResponse)
+	var customCoingeckoPrice response.CustomCoingeckoPrice
+	customCoingeckoPrice.ETH = cryptoResponse.Ethereum
+	customCoingeckoPrice.USDT = cryptoResponse.USDT
+	customCoingeckoPrice.USDC = cryptoResponse.USDC
+
+	cryptoByte, err := json.Marshal(customCoingeckoPrice)
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
 		return
@@ -58,6 +63,4 @@ func RunCoingeckoCore() {
 		global.MARKET_LOG.Error(err.Error())
 		return
 	}
-
-	return
 }
