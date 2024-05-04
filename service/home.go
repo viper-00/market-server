@@ -1,17 +1,13 @@
 package service
 
 import (
-	"context"
-	"encoding/json"
 	"errors"
-	"fmt"
 	"market/global"
 	"market/global/constant"
 	"market/model"
 	"market/model/market/request"
 	"market/model/market/response"
 	"market/utils/wallet"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -75,6 +71,15 @@ func (m *MService) GetMarketEventForHome(c *gin.Context, req request.GetMarketEv
 			r.Type = v.Type
 			r.UniqueCode = v.UniqueWebsiteCode
 
+			var play model.EventPlay
+			err = global.MARKET_DB.Where("id = ? AND status = 1", v.PlayId).First(&play).Error
+			if err != nil {
+				global.MARKET_LOG.Error(err.Error())
+				return
+			}
+
+			r.Coin = play.Coin
+
 			var orders []model.EventOrder
 			err = global.MARKET_DB.Where("event_id = ? AND status = 1 AND order_status = 1", v.ID).Find(&orders).Error
 			if err != nil {
@@ -104,6 +109,7 @@ func (m *MService) GetMarketEventForHome(c *gin.Context, req request.GetMarketEv
 func (m *MService) GetTopVolumnForHome(c *gin.Context) (results []response.TopVolumnForHomeResponse, err error) {
 	// chainId, _ := c.Get("chainId")
 	// intChainId := int(chainId.(float64))
+	intChainId := constant.OP_SEPOLIA
 
 	var limit = 10
 
@@ -118,34 +124,15 @@ func (m *MService) GetTopVolumnForHome(c *gin.Context) (results []response.TopVo
 		var result response.TopVolumnForHomeResponse
 		result.UserContractAddress = v.ContractAddress
 
-		balance, balanceErr := wallet.GetUsdtTokenBalance(constant.OP_SEPOLIA, v.ContractAddress)
+		balance, balanceErr := wallet.GetAllTokenBalance(intChainId, v.ContractAddress)
 		if balanceErr != nil {
 			global.MARKET_LOG.Error(balanceErr.Error())
 			return
 		}
 
-		result.CryptoAmount = balance
-
-		cryptoFromRedis, redisErr := global.MARKET_REDIS.Get(context.Background(), constant.CRYPTO_PRICE).Result()
-		if redisErr != nil {
-			global.MARKET_LOG.Error(redisErr.Error())
-			return
-		}
-
-		var cryptoResponse response.CoingeckoPrice
-		unmarshalErr := json.Unmarshal([]byte(cryptoFromRedis), &cryptoResponse)
-		if err != nil {
-			global.MARKET_LOG.Error(unmarshalErr.Error())
-			return
-		}
-
-		balanceFloat64, parseErr := strconv.ParseFloat(balance, 64)
-		if parseErr != nil {
-			global.MARKET_LOG.Error(parseErr.Error())
-			return
-		}
-
-		result.LegalAmount = fmt.Sprintf("%f", cryptoResponse.USDT.USD*balanceFloat64)
+		result.EthBalance = balance.ETH
+		result.UsdtBalance = balance.USDT
+		result.UsdcBalance = balance.USDC
 
 		var setting model.UserSetting
 		err = global.MARKET_DB.Where("user_id = ? AND status = 1", v.ID).First(&setting).Error
@@ -186,6 +173,15 @@ func (m *MService) GetRecentActivityForHome(c *gin.Context) (results []response.
 			global.MARKET_LOG.Error(err.Error())
 			return
 		}
+
+		var play model.EventPlay
+		err = global.MARKET_DB.Where("id = ? AND status = 1", event.PlayId).First(&play).Error
+		if err != nil {
+			global.MARKET_LOG.Error(err.Error())
+			return
+		}
+
+		result.Coin = play.Coin
 
 		result.EventLogo = event.EventLogo
 		result.Title = event.Title

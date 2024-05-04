@@ -347,6 +347,22 @@ func (m *MService) GetUserProfile(c *gin.Context, profile request.GetUserProfile
 		filterOrder.OrderType = constant.AllOrderTypes[v.OrderType]
 		filterOrder.CreatedTime = int(v.CreatedAt.UnixMilli())
 		filterOrder.Hash = v.Hash
+
+		var eventModel model.Event
+		err = global.MARKET_DB.Where("id = ? AND status = 1", v.EventId).First(&eventModel).Error
+		if err != nil {
+			global.MARKET_LOG.Error(err.Error())
+			return nil, err
+		}
+
+		var eventPlay model.EventPlay
+		err = global.MARKET_DB.Where("id = ? AND status = 1", eventModel.PlayId).First(&eventPlay).Error
+		if err != nil {
+			global.MARKET_LOG.Error(err.Error())
+			return nil, err
+		}
+
+		filterOrder.Coin = eventPlay.Coin
 		filterOrders = append(filterOrders, filterOrder)
 	}
 

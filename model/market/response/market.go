@@ -59,6 +59,7 @@ type EventOrderResponse struct {
 	Username            string  `json:"username"`
 	CreatedTime         int     `json:"created_time"`
 	Hash                string  `json:"hash"`
+	Coin                string  `json:"coin"`
 }
 
 type EventCommentResponse struct {
@@ -80,15 +81,17 @@ type EventForHomeResponse struct {
 	Type             string  `json:"type"`
 	SettlementTime   int     `json:"settlement_time"`
 	TotalOrderAmount float64 `json:"total_order_amount"`
+	Coin             string  `json:"coin"`
 	CommentCount     int     `json:"comment_count"`
 }
 
 type TopVolumnForHomeResponse struct {
 	AvatarUrl           string `json:"avatar_url"`
 	Username            string `json:"username"`
-	CryptoAmount        string `json:"crypto_amount"`
-	LegalAmount         string `json:"legal_amount"`
 	UserContractAddress string `json:"user_address"`
+	EthBalance          string `json:"eth_balance"`
+	UsdtBalance         string `json:"usdt_balance"`
+	UsdcBalance         string `json:"usdc_balance"`
 }
 
 type RecentActivityForHomeResponse struct {
@@ -101,4 +104,5 @@ type RecentActivityForHomeResponse struct {
 	OrderType   string  `json:"order_type"`
 	Username    string  `json:"username"`
 	PlayValue   string  `json:"play_value"`
+	Coin        string  `json:"coin"`
 }
