@@ -67,7 +67,10 @@ var (
 
 	OPMainnetRPC = []string{
 		// "https://opt-mainnet.g.alchemy.com/v2/" + getRandomAlchemyKey(true),
-		"https://mainnet.optimism.io",
+		// "https://mainnet.optimism.io",
+		"https://optimism-rpc.publicnode.com",
+		"https://op-pokt.nodies.app",
+		"https://1rpc.io/op",
 	}
 
 	OPGoerliRPC = []string{
@@ -77,7 +80,9 @@ var (
 
 	OPSepoliaRPC = []string{
 		// "https://opt-sepolia.g.alchemy.com/v2/" + getRandomAlchemyKey(false),
-		"https://sepolia.optimism.io",
+		// "https://sepolia.optimism.io",
+		"https://optimism-sepolia.blockpi.network/v1/rpc/public",
+		"https://endpoints.omniatech.io/v1/op/sepolia/public",
 	}
 
 	ArbitrumOneRPC = []string{
