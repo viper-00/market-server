@@ -18,7 +18,7 @@ func ClientAuth() gin.HandlerFunc {
 			return
 		}
 
-		emailResult, err := global.MARKET_REDIS.Get(context.Background(), authorization).Result()
+		emailorAddressResult, err := global.MARKET_REDIS.Get(context.Background(), authorization).Result()
 		if err != nil {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
@@ -38,12 +38,12 @@ func ClientAuth() gin.HandlerFunc {
 		contractAddress := claims["contractAddress"].(string)
 		time := claims["time"].(float64)
 
-		if emailResult != email {
+		if emailorAddressResult != email && emailorAddressResult != address {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
-		if chainId == 0 || email == "" || address == "" || contractAddress == "" || time == 0 {
+		if chainId == 0 || address == "" || contractAddress == "" || time == 0 {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}

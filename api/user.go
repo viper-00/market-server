@@ -106,6 +106,30 @@ func (n *MarketApi) LoginByCode(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+func (n *MarketApi) LoginByWallet(c *gin.Context) {
+	var res common.Response
+	var user request.UserLoginByWallet
+
+	err := c.ShouldBind(&user)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		res = common.FailWithMessage(err.Error())
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
+	result, err := service.MarketService.UserLoginByWallet(user)
+	if err != nil {
+		global.MARKET_LOG.Error(err.Error())
+		res = common.FailWithMessage(err.Error())
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
+	res = common.OKWithData(result)
+	c.JSON(http.StatusOK, res)
+}
+
 func (n *MarketApi) GetUserInfo(c *gin.Context) {
 	var res common.Response
 

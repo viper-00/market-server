@@ -38,6 +38,7 @@ func (mRouter *MarketRouter) InitRouter(Router *gin.RouterGroup) {
 		clientRouter.POST("register", api.Register)
 		clientRouter.GET("verify-invitation", api.VerifyInvitation)
 		clientRouter.POST("login", api.Login)
+		clientRouter.POST("login-by-wallet", api.LoginByWallet)
 		clientRouter.POST("login-by-code", api.LoginByCode)
 		clientRouter.GET("crypto-price", api.GetCryptoPrice)
 		clientRouter.GET("user-profile", api.GetUserProfile)
