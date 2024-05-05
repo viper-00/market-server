@@ -309,15 +309,18 @@ func (m *MService) InitializeAccount(chainId int, email, connectAddress string) 
 	var (
 		address    string
 		privateKey string
+		way        uint
 	)
 	if connectAddress != "" {
 		address = connectAddress
+		way = 2
 	} else {
 		privateKey, address, err = wallet.GenerateEthereumWallet()
 		if err != nil {
 			global.MARKET_LOG.Error(err.Error())
 			return
 		}
+		way = 1
 	}
 
 	contractAddress, err := wallet.GenerateEthereumCollectionContract(chainId, address)
@@ -336,6 +339,7 @@ func (m *MService) InitializeAccount(chainId int, email, connectAddress string) 
 	user.ChainId = chainId
 	user.SuperiorId = 0
 	user.InvitationCode = utils.GenerateStringRandomly("market_invite_code_", 8)
+	user.Way = way
 	err = global.MARKET_DB.Save(&user).Error
 	if err != nil {
 		global.MARKET_LOG.Error(err.Error())
